@@ -1,0 +1,11 @@
+2025-06-06 15:20:06,255 | INFO | Logging initialized.
+2025-06-06 15:20:06,255 | INFO | Starting Dairy Plant Scheduling Simulation...
+2025-06-06 15:20:06,255 | INFO | Loading input data from 'data' folder...
+2025-06-06 15:20:06,255 | ERROR | Failed to load data: 'PosixPath' object has no attribute 'load_skus'
+2025-06-06 15:20:06,255 | ERROR | An error occurred: 'PosixPath' object has no attribute 'load_skus'
+Traceback (most recent call last):
+  File "/Users/krishnenduchowdhury/Dairy Project/main.py", line 40, in main
+    data_tables = DataLoader.load_all_data(DATA_DIR)
+  File "/Users/krishnenduchowdhury/Dairy Project/utils/data_loader.py", line 29, in load_all_data
+    'skus': self.load_skus(),
+AttributeError: 'PosixPath' object has no attribute 'load_skus'
