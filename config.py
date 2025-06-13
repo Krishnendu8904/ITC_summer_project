@@ -5,7 +5,7 @@ Contains all constants, penalties, and system parameters
 from datetime import timedelta, datetime
 from pathlib import Path
 import models.data_models as dm
-from models.data_models import SKU, Line, Tank, Shift, UserIndent
+from models.data_models import SKU, Line, Tank, Shift, UserIndent, Equipment, Product, Room, CIP_circuit
 from typing import List, Dict
 
 # File Paths
@@ -30,6 +30,10 @@ SKUS: Dict[str, SKU] = {}
 TANKS: Dict[str, Tank] = {}
 SHIFTS: Dict[str, Shift] = {}
 USER_INDENTS: Dict[str, UserIndent] = {}
+EQUIPMENTS: Dict[str, Equipment] = {}
+PRODUCTS: Dict[str, Product] = {}
+ROOMS: Dict[str, Room] = {}
+CIP_CIRCUIT: Dict[str, CIP_circuit] = {}
 
 
 # Scheduling Penalties (for optimization scoring)

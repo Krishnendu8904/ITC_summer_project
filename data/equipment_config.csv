@@ -1,0 +1,4 @@
+Equipment_ID,Processing Speed,Supported_Product_Categories,CIP_Circuit,CIP_Duration_Min,Status,Setup_Time_Min,Current_Product_Category
+MIXER-1,166.67,"CURD,MISHTI_DOI",CIRCUIT-1,45,Idle,20,
+PASTEURIZER-1,166.67,,CIRCUIT-2,90,Idle,30,
+HOMOGENIZER-1,166.67,CURD,CIRCUIT-1,60,Idle,15,

@@ -1,0 +1,4 @@
+Shift_ID,Start_Time,End_Time,Is_Active
+A,06:00,14:00,True
+B,14:00,22:00,True
+C,22:00,06:00,True

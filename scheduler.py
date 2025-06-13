@@ -279,7 +279,7 @@ class ProductionScheduler:
             if time_to_due < timedelta(minutes=0): # Past due
                 score += abs(time_to_due.total_seconds() / 3600) * config.PENALTY_WEIGHTS.get('lateness_cost', 10.0) # Penalty per hour late
             elif time_to_due < timedelta(days=1): # Within 24 hours of due date
-                score += config.PENALTY_WEIGHTS.get('due_date_proximity_cost', 1.0) # Smaller penalty for being close
+                score -= abs(time_to_due.total_seconds() / 3600)*config.PENALTY_WEIGHTS.get('due_date_proximity_cost', 5.0) # Smaller penalty for being close
 
         # Setup cost
         setup_time = self._calculate_setup_time(line_id, sku)

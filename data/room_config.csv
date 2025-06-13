@@ -1,0 +1,4 @@
+Room_ID,Capacity_Units,Supported_SKUs,Room_Type,Current_Occupancy_Units,Status,Temperature_Celsius,Humidity_Percent
+INCUBATOR-1,1000.0,,Incubator,0.0,Active,42.0,85.0
+BLAST_CHILLER-1,500.0,,Blast Chilling,0.0,Active,2.0,
+COLD_STORAGE-1,2000.0,,Storage,0.0,Active,4.0,

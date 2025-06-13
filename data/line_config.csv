@@ -1,0 +1,5 @@
+Line_ID,Compatible SKUs and Max Production,CIP_Circuit,CIP_Duration_Min,Status,Setup_Time_Min,Current_SKU,Current_Product_Category
+CUPLINE-1,CUPSEL200:5.75;CUPSEL400:11.0,,90,Idle,45,,CURD
+MISHTI_LINE-1,CUPMID200:5.25,,120,Idle,60,,MISHTI_DOI
+POUCH_PACKING_LINE,PCHSEL400:10.0,,75,Idle,30,,
+BUCKETLINE-1,BUCLOF1KG:10.25,,100,Idle,50,,CURD

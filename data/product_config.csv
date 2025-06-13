@@ -1,0 +1,10 @@
+Product_Category,Step_ID,Step_Name,Resource_Type,Duration_Minutes_Per_Batch,Min_Capacity_Required_Liters,Compatible_Resource_IDs,Requires_Setup,Requires_CIP_After
+CURD,CURD_MIXING,Milk Mixing,Equipment,30.0,1000.0,MIXER-1,True,True
+CURD,CURD_PASTEURIZATION,Pasteurization,Equipment,45.0,1000.0,PASTEURIZER-1,True,True
+CURD,CURD_INCUBATION,Incubation,Room,480.0,0.0,INCUBATOR-1,False,False
+CURD,CURD_PACKAGING,Packaging,Line,60.0,0.0,,True,True
+MISHTI_DOI,MISHTI_MIXING,Sweetened Milk Mixing,Equipment,45.0,500.0,MIXER-1,True,True
+MISHTI_DOI,MISHTI_PASTEURIZATION,Pasteurization,Equipment,60.0,500.0,PASTEURIZER-1,True,True
+MISHTI_DOI,MISHTI_INCUBATION,Sweet Incubation,Room,360.0,0.0,INCUBATOR-1,False,False
+MISHTI_DOI,MISHTI_CHILLING,Blast Chilling,Room,120.0,0.0,BLAST_CHILLER-1,False,False
+MISHTI_DOI,MISHTI_PACKAGING,Packaging,Line,45.0,0.0,MISHTI_LINE-1,True,True

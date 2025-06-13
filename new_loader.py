@@ -17,8 +17,6 @@ from config import *
 
 logger = logging.getLogger(__name__)
 
-
-
 class DataLoader:
     """Loads and validates all input data files"""
     
@@ -31,6 +29,7 @@ class DataLoader:
         config.SKUS.clear()
         config.SHIFTS.clear()
         config.TANKS.clear()
+        config.USER_INDENTS.clear()
         config.EQUIPMENTS.clear()
         config.PRODUCTS.clear()
         config.ROOMS.clear()
@@ -42,7 +41,6 @@ class DataLoader:
             logger.info("Loading all production data...")
             
             # Load basic resources
-            self.clear_all_data()
             config.SKUS.update(self.load_skus_with_fallback())
             config.LINES.update(self.load_lines_with_fallback())
             config.TANKS.update(self.load_tanks_with_fallback())
@@ -57,6 +55,7 @@ class DataLoader:
             
             # Load compatibility and constraints
             self.load_line_sku_compatibility()
+            self.load_constraints()
             
             if self.validation_errors:
                 logger.warning(f"Data validation warnings: {self.validation_errors}")
@@ -67,57 +66,6 @@ class DataLoader:
         except Exception as e:
             logger.error(f"Failed to load data: {str(e)}")
             raise
-    
-    def _str_to_dict_with_validation(self, s: str, valid_skus: Dict[str, Any], entity_id: str = "N/A") -> Dict[str, float]:
-        """
-        Converts a semicolon-separated string of SKU:Rate pairs to a dictionary.
-        Performs validation for format, SKU existence, and rate validity.
-        """
-        result = {}
-        errors = []
-        if not s:
-            return result
-
-        pairs = s.split(';')
-        print('printing Pairs')
-        print(pairs)
-        for pair in pairs:
-            if not pair.strip():
-                continue
-            parts = pair.split(':', 1)
-            if len(parts) != 2:
-                errors.append(f"Invalid format '{pair}'. Expected 'SKU_ID:Rate'.")
-                continue
-            
-            
-            sku_id = parts[0].strip()
-            rate_str = parts[1].strip()
-
-            if not sku_id:
-                errors.append(f"Empty SKU ID in pair '{pair}'.")
-                continue
-            if sku_id not in valid_skus:
-                errors.append(f"SKU ID '{sku_id}' not found in SKU configurations.")
-                
-            try:
-                rate = float(rate_str)
-                if rate <= 0:
-                    errors.append(f"Production rate for SKU '{sku_id}' must be positive (got {rate}).")
-            except ValueError:
-                errors.append(f"Invalid production rate '{rate_str}' for SKU '{sku_id}'. Expected a number.")
-                continue # Don't add to result if rate is invalid
-
-            if sku_id in result:
-                errors.append(f"Duplicate SKU ID '{sku_id}' in compatible SKUs list.")
-                continue
-
-            # Only add to result if all checks pass
-            if not errors: # If no errors for this specific pair
-                result[sku_id] = rate
-        
-        if errors:
-            self.validation_errors.append(f"Errors for '{entity_id}' Compatible SKUs Max Production: {'; '.join(errors)}")
-        return result
     
     def load_sample_data(self):
         """Load all Sample Data and store in config variables"""
@@ -135,7 +83,6 @@ class DataLoader:
         config.EQUIPMENTS = self._create_sample_equipment()
         config.ROOMS = self._create_sample_rooms()
         config.PRODUCTS = self._create_sample_products()
-        print(f"DataLoader: config.PRODUCTS updated. Total products in config: {len(config.PRODUCTS)}") # ADD THIS
         config.CIP_CIRCUIT = self._create_sample_cip_circuits()
         
         logger.info("Sample Data Loaded Successfully")
@@ -176,15 +123,9 @@ class DataLoader:
         lines = {}
         for _, row in df.iterrows():
             try:
-                line_id = str(row["Line_ID"])
-                compatible_skus_max_production_str = str(row.get("Compatible SKUs and Max Production", "")).strip()
-                # Use the helper function with validation
-                compatible_skus_max_production = self._str_to_dict_with_validation(
-                    compatible_skus_max_production_str, config.SKUS, line_id
-                )
                 line = Line(
-                    line_id=line_id,
-                    compatible_skus_max_production=compatible_skus_max_production, 
+                    line_id=str(row['Line_ID']),
+                    compatible_skus_max_production={},  # Will be populated separately
                     CIP_circuit= str(row.get('CIP_Circuit', '')) if pd.notna(row.get('CIP_Circuit')) else None,
                     cip_duration=int(row.get('CIP_Duration_Min', 60)),
                     status=ResourceStatus(row.get('Status', 'IDLE')),
@@ -325,6 +266,8 @@ class DataLoader:
                     room_type=RoomType(row.get('Room_Type', 'STORAGE')),
                     current_occupancy_units=float(row.get('Current_Occupancy_Units', 0.0)),
                     status=ResourceStatus(row.get('Status', 'ACTIVE')),
+                    temperature_celsius=float(row.get('Temperature_Celsius')) if pd.notna(row.get('Temperature_Celsius')) else None,
+                    humidity_percent=float(row.get('Humidity_Percent')) if pd.notna(row.get('Humidity_Percent')) else None
                 )
                 
                 rooms[room.room_id] = room
@@ -431,8 +374,6 @@ class DataLoader:
         file_path = self.data_dir / "spl_constraints.csv"
         if file_path.exists():
             df = pd.read_csv(file_path)
-            if not df:
-                pass
             return df.to_dict('records')
         return {}
 
@@ -485,11 +426,11 @@ class DataLoader:
     # Sample data creation methods
     def _create_sample_skus(self) -> Dict[str, SKU]:
         return {
-            "CUPSEL200": SKU("CUPSEL200", "CURD", "SELECT", 0.2),
-            "BUCLOF1KG": SKU("BUCLOF1KG", "CURD", "LOW_FAT", 1.0),
-            "PCHSEL400": SKU("PCHSEL400", "CURD", "SELECT", 0.4),
-            "CUPMID200": SKU("CUPMID200", "MISHTI_DOI", "TRADITIONAL", 0.2),
-            "CUPSEL400": SKU("CUPSEL400", "CURD", "SELECT", 0.4)
+            "CUPSEL200": SKU("CUPSEL200", "CURD", "SELECT_200ML", 0.2),
+            "BUCLOF1KG": SKU("BUCLOF1KG", "CURD", "LOW_FAT_1KG", 1.0),
+            "PCHSEL400": SKU("PCHSEL400", "CURD", "SELECT_400ML_POUCH", 0.4),
+            "CUPMID200": SKU("CUPMID200", "MISHTI_DOI", "TRADITIONAL_200ML", 0.2),
+            "CUPSEL400": SKU("CUPSEL400", "CURD", "SELECT_400ML", 0.4)
         }
 
     def _create_sample_lines(self) -> Dict[str, Line]:
@@ -660,21 +601,25 @@ class DataLoader:
                 capacity_units=1000,
                 supported_skus=[],  # Supports all
                 room_type=RoomType.INCUBATOR,
-                status=ResourceStatus.ACTIVE
+                status=ResourceStatus.ACTIVE,
+                temperature_celsius=42.0,
+                humidity_percent=85.0
             ),
             "BLAST_CHILLER-1": Room(
                 room_id="BLAST_CHILLER-1",
                 capacity_units=500,
                 supported_skus=[],
                 room_type=RoomType.BLAST_CHILLING,
-                status=ResourceStatus.ACTIVE
+                status=ResourceStatus.ACTIVE,
+                temperature_celsius=2.0
             ),
             "COLD_STORAGE-1": Room(
                 room_id="COLD_STORAGE-1",
                 capacity_units=2000,
                 supported_skus=[],
                 room_type=RoomType.STORAGE,
-                status=ResourceStatus.ACTIVE
+                status=ResourceStatus.ACTIVE,
+                temperature_celsius=4.0
             )
         }
 
@@ -808,7 +753,7 @@ class DataLoader:
         ]
         return pd.DataFrame(compatibility_data)
 
-    def _get_csv_or_warn(self, filename: str, write: bool = False) -> Optional[Union[Path, pd.DataFrame]]:
+    def _get_csv_or_warn(self, filename: str, write: bool = False) -> Optional[pd.DataFrame]:
         """Helper method to load CSV with error handling"""
         file_path = self.data_dir / filename
         
