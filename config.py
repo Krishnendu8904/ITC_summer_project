@@ -4,8 +4,8 @@ Contains all constants, penalties, and system parameters
 """
 from datetime import timedelta, datetime
 from pathlib import Path
-import models.data_models as dm
-from models.data_models import SKU, Line, Tank, Shift, UserIndent, Equipment, Product, Room, CIP_circuit
+import utils.data_models as dm
+from utils.data_models import *
 from typing import List, Dict
 
 # File Paths
@@ -35,14 +35,23 @@ PRODUCTS: Dict[str, Product] = {}
 ROOMS: Dict[str, Room] = {}
 CIP_CIRCUIT: Dict[str, CIP_circuit] = {}
 
+    
+def get_resource(self, id: str):
+    """Return the actual class type associated with this resource type."""
+    return {
+        ResourceType.TANK: TANKS[id],
+        ResourceType.LINE: LINES[id],
+        ResourceType.ROOM: ROOMS[id],
+        ResourceType.EQUIPMENT: EQUIPMENTS[id]
+    }[self]
+    
 
 # Scheduling Penalties (for optimization scoring)
 PENALTY_WEIGHTS = {
     'unfulfilled_demand': 1000,      # Heavy penalty for not meeting demand
     'line_setup_cost': 50,           # Cost of line changeover
-    'tank_cip_cost': 100,            # Cost of CIP operations
+    'tank_CIP_cost': 100,            # Cost of CIP operations
     'shift_overtime_cost': 2000,      # Cost of exceeding shift time
-    'variant_change_cost': 1000,       # Cost of changing product variants
     'efficiency_bonus': -25          # Bonus for efficient line utilization
 }
 
@@ -70,7 +79,7 @@ DEFAULTS = {
     'priority': 3,              # Medium priority if not specified
     'production_rate': 5.75,     # Liters per minutes default
     'setup_time': 30,          # Minutes
-    'cip_time': 45,             # Minutes
+    'CIP_time': 45,             # Minutes
     'base_date': datetime.now() + timedelta(1)
 }
 

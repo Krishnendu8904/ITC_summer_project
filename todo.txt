@@ -1,0 +1,231 @@
+Step-by-Step Implementation Plan
+1. Multiple Resources per Step with Simultaneous Usage
+Current Issue: Each step uses exactly one resource (AddExactlyOne)
+Changes Needed:
+Remove:
+python# In _create_equipment_vars()
+if resource_vars:
+    self.model.AddExactlyOne(resource_vars.values())
+Add:
+python# New method in ProcessingStep dataclass
+@dataclass
+class ProcessingStep:
+    # ... existing fields
+    min_resources_required: int = 1
+    max_resources_allowed: int = 1
+    simultaneous_usage: bool = False
+    resource_speed_factors: Dict[str, float] = field(default_factory=dict)
+
+# In _create_equipment_vars()
+def _create_equipment_vars(self, order_no: str, batch_index: int, step: ProcessingStep):
+    resource_vars = {}
+    for res_id in step.compatible_resource_ids:
+        bool_var = self.model.NewBoolVar(f'use_res_{order_no}_{batch_index}_{step.step_id}_{res_id}')
+        resource_vars[res_id] = bool_var
+    
+    if resource_vars:
+        # Allow multiple resource selection
+        selected_resources = sum(resource_vars.values())
+        self.model.Add(selected_resources >= step.min_resources_required)
+        self.model.Add(selected_resources <= step.max_resources_allowed)
+    
+    return resource_vars
+
+# New method for parallel processing duration
+def _calculate_parallel_duration(self, step: ProcessingStep, selected_resources: List[str], batch_volume: int):
+    if not step.simultaneous_usage:
+        return step.duration_minutes_per_batch
+    
+    # Calculate combined processing speed
+    total_speed_factor = sum(step.resource_speed_factors.get(res_id, 1.0) for res_id in selected_resources)
+    if total_speed_factor > 0:
+        return max(1, int(step.duration_minutes_per_batch / total_speed_factor))
+    return step.duration_minutes_per_batch
+2. Adding Elasticity
+Add New Classes:
+python@dataclass
+class ElasticityConfig:
+    allow_overtime: bool = True
+    overtime_cost_multiplier: float = 1.5
+    max_overtime_hours_per_day: int = 4
+    weekend_production: bool = False
+    emergency_shift_cost: float = 2.0
+
+class ElasticTimeManager(TimeManager):
+    def __init__(self, *args, elasticity_config: ElasticityConfig = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.elasticity_config = elasticity_config or ElasticityConfig()
+        self.elastic_windows = self._calculate_elastic_windows()
+    
+    def _calculate_elastic_windows(self):
+        # Add overtime windows after regular shifts
+        # Add weekend/holiday windows if allowed
+        pass
+Modify in AdvancedProductionScheduler:
+python# Add elastic time variables
+self.overtime_vars = {}
+self.emergency_shift_vars = {}
+
+# In _create_objective()
+# Add overtime cost penalties
+for overtime_var in self.overtime_vars.values():
+    objective_terms.append(-overtime_var * self.elasticity_config.overtime_cost_multiplier * 100)
+3. Live Scheduling with Revision Handling
+Add New Classes:
+python@dataclass
+class ScheduleRevision:
+    revision_timestamp: datetime
+    revised_indents: List[UserIndent]
+    locked_tasks: List[str]  # Tasks that cannot be changed
+    priority_changes: Dict[str, Priority]
+
+class LiveScheduler(AdvancedProductionScheduler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.current_schedule: Optional[SchedulingResult] = None
+        self.locked_tasks: Set[str] = set()
+        self.revision_history: List[ScheduleRevision] = []
+    
+    def update_schedule_with_revision(self, revision: ScheduleRevision) -> SchedulingResult:
+        # Lock currently executing tasks
+        self._lock_active_tasks(revision.revision_timestamp)
+        
+        # Update indents
+        self._update_indents(revision.revised_indents)
+        
+        # Reschedule from next available shift
+        next_shift_start = self._get_next_shift_start(revision.revision_timestamp)
+        
+        return self.schedule_production_from_time(next_shift_start)
+Modify existing methods:
+python# In _add_constraints()
+def _add_revision_constraints(self):
+    """Add constraints for locked tasks and revision requirements"""
+    for task_id in self.locked_tasks:
+        # Fix start/end times for locked tasks
+        # Prevent resource reassignment
+        pass
+
+# In _set_variables()
+def _handle_existing_schedule_continuity(self):
+    """Ensure continuity with existing schedule"""
+    if self.current_schedule:
+        # Fix variables for ongoing tasks
+        # Maintain resource assignments where possible
+        pass
+4. Maximum Feasible Production Analysis
+Add New Classes:
+python@dataclass
+class ProductionCapacityRequest:
+    sku_list: List[str]
+    production_horizon_hours: int
+    target_ratios: Dict[str, float] = None  # Optional production ratios
+    resource_constraints: Dict[str, float] = None  # Resource availability factors
+
+class CapacityAnalyzer:
+    def __init__(self, scheduler: AdvancedProductionScheduler):
+        self.scheduler = scheduler
+    
+    def find_maximum_feasible_production(self, request: ProductionCapacityRequest) -> Dict[str, int]:
+        """Find maximum production quantities for given SKUs"""
+        
+        # Create synthetic indents with large quantities
+        synthetic_indents = self._create_synthetic_indents(request)
+        
+        # Modify objective to maximize total production
+        objective_terms = []
+        for sku_id in request.sku_list:
+            production_var = self.scheduler.produced_quantity[f"synthetic_{sku_id}"]
+            weight = request.target_ratios.get(sku_id, 1.0) if request.target_ratios else 1.0
+            objective_terms.append(production_var * weight)
+        
+        # Solve with production maximization objective
+        result = self.scheduler._solve_capacity_optimization(synthetic_indents, objective_terms)
+        
+        return self._extract_maximum_quantities(result, request.sku_list)
+5. Additional Structural Improvements
+Database Integration Layer:
+pythonclass ScheduleStateManager:
+    def save_schedule_state(self, result: SchedulingResult):
+        """Persist schedule to database"""
+        pass
+    
+    def load_current_schedule(self) -> Optional[SchedulingResult]:
+        """Load current active schedule"""
+        pass
+    
+    def mark_tasks_completed(self, task_ids: List[str]):
+        """Mark tasks as completed in real-time"""
+        pass
+Performance Monitoring:
+pythonclass PerformanceTracker:
+    def __init__(self):
+        self.solve_times = []
+        self.iteration_scores = []
+    
+    def track_iteration_performance(self, iteration: int, solve_time: float, score: float):
+        """Track performance metrics per iteration"""
+        pass
+    
+    def suggest_parameter_adjustments(self) -> Dict[str, Any]:
+        """ML-based parameter tuning suggestions"""
+        pass
+6. Configuration Changes
+Update config.py to include:
+python# Add to ProcessingStep
+PROCESSING_STEPS = {
+    "mixing": ProcessingStep(
+        step_id="mixing",
+        # ... existing fields
+        min_resources_required=1,
+        max_resources_allowed=2,
+        simultaneous_usage=True,
+        resource_speed_factors={"mixer_1": 1.0, "mixer_2": 0.8, "mixer_3": 1.2}
+    )
+}
+
+# Add elasticity configuration
+ELASTICITY_CONFIG = ElasticityConfig(
+    allow_overtime=True,
+    overtime_cost_multiplier=1.5,
+    max_overtime_hours_per_day=4
+)
+7. Method Modifications Priority Order
+
+High Priority (Core Functionality):
+
+Modify _create_equipment_vars() for multi-resource support
+Update _calculate_dynamic_duration() for parallel processing
+Add _add_revision_constraints() method
+
+
+Medium Priority (Enhanced Features):
+
+Implement LiveScheduler class
+Add CapacityAnalyzer class
+Create elastic time windows
+
+
+Low Priority (Infrastructure):
+
+Add database persistence layer
+Implement performance tracking
+Add configuration validation
+
+
+
+8. Testing Strategy
+Unit Tests to Add:
+
+Multi-resource assignment validation
+Parallel processing duration calculations
+Schedule revision constraint handling
+Capacity analysis accuracy
+
+Integration Tests:
+
+End-to-end live scheduling scenarios
+Performance under different elasticity configurations
+Maximum production capacity validation
+
+This step-by-step approach allows you to implement features incrementally while maintaining system stability. Start with the high-priority changes and gradually add the enhanced features.

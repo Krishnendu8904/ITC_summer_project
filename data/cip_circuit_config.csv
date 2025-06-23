@@ -1,4 +1,0 @@
-Circuit_ID,Connected_Resource_IDs,Is_Available,Standard_CIP_Duration_Min
-CIRCUIT-1,"LT-1,LT-2,MIXER-1,HOMOGENIZER-1",True,60
-CIRCUIT-2,"LT-3,PASTEURIZER-1",True,90
-CIRCUIT-3,LT-4,True,75

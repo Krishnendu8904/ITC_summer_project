@@ -1,102 +1,227 @@
 import streamlit as st
 import pandas as pd
 import config
-from models.data_models import Room, RoomType, ResourceStatus # Import Room, RoomType, ResourceStatus
-from data_loader import DataLoader
-from datetime import datetime # Keep datetime for general utility, though not specifically for Room's times here
-import numpy as np # Import numpy to handle NaN values from data editor
+from utils.data_models import Room, RoomType, ResourceStatus
+from utils.data_loader import DataLoader
+from datetime import datetime
+import numpy as np
 
-def render_room_manager(data_loader: DataLoader): # Changed function name
+def render_room_manager(data_loader: DataLoader):
     """
     Renders the Room configuration UI for editing and saving Rooms.
     """
-    st.subheader("🏠 Room Configuration") # Changed subheader
-    st.markdown("Define production rooms, their capacities, and environmental controls.") # Changed description
+
+    col1, col2 = st.columns([0.8, 0.2])
+
+    with col1:
+        st.subheader("🏠 Room Configuration")
+        st.markdown("Define production rooms, their capacities, and environmental controls.")
+    with col2:
+        if st.button("🔃 RELOAD", use_container_width=True, type='primary', key="reload_rooms_btn"):
+            try:
+                config.ROOMS.update(data_loader.load_skus_with_fallback())
+                st.session_state.sku_config = config.SKUS.copy()
+            except Exception as e:
+                st.error(f"❌ Error reloading data: {e}")
 
     # Use session state for interactive editing
-    if 'room_config' not in st.session_state: # Changed session state key
-        st.session_state.room_config = config.ROOMS.copy() # Changed config.SKUS to config.ROOMS
+    if 'room_config' not in st.session_state:
+        st.session_state.room_config = config.ROOMS.copy()
 
-    try:
-        # Convert Room objects to dictionary for DataFrame display
-        df_display = pd.DataFrame([room._to_dict() for room in st.session_state.room_config.values()]) # Changed variable name
-    except Exception as e:
-        st.error(f"Error preparing Room data for display: {e}") # Changed error message
-        st.error("Please ensure the data models and CSV headers are consistent.")
-        return
+    # Create list of room IDs for selectbox
+    room_ids = list(st.session_state.room_config.keys())
+    selectbox_options = ["-- Add New Room --"] + room_ids
 
-    # Get available RoomType and ResourceStatus values for selectbox columns
+    # Room selection dropdown
+    selected_option = st.selectbox(
+        "Select Room to Edit or Add New:",
+        options=selectbox_options,
+        key="room_selector"
+    )
+
+    # Determine if we're adding new or editing existing
+    is_new_room = selected_option == "-- Add New Room --"
+    selected_room = None if is_new_room else st.session_state.room_config.get(selected_option)
+
+    # Get available options for dropdowns
     room_type_options = [rt.value for rt in RoomType]
     resource_status_options = [status.value for status in ResourceStatus]
 
-    edited_df = st.data_editor(
-        df_display,
-        num_rows="dynamic",
-        key="room_editor", # Changed key
-        use_container_width=True,
-        column_config={
-            "Room_ID": st.column_config.TextColumn("Room ID", required=True),
-            "Capacity_Units": st.column_config.NumberColumn("Capacity (Units)", required=True, min_value=0.0),
-            "Supported_SKUs": st.column_config.TextColumn("Supported SKUs (comma-separated)"),
-            "Room_Type": st.column_config.SelectboxColumn("Room Type", options=room_type_options, required=True),
-            "Current_Occupancy_Units": st.column_config.NumberColumn("Current Occupancy (Units)", min_value=0.0),
-            "Status": st.column_config.SelectboxColumn("Status", options=resource_status_options, required=True),
-        }
-    )
+    # Room editing form
+    with st.form(key="room_form"):
+        st.markdown("### Room Details")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            room_id = st.text_input(
+                "Room ID",
+                value="" if is_new_room else selected_room.room_id,
+                disabled=not is_new_room,  # Disable editing ID for existing rooms
+                help="Unique identifier for the room"
+            )
+            
+            capacity_units = st.number_input(
+                "Capacity (Units)",
+                min_value=0.0,
+                value=0.0 if is_new_room else selected_room.capacity_units,
+                step=1.0,
+                help="Maximum capacity of the room in units"
+            )
+            
+            room_type = st.selectbox(
+                "Room Type",
+                options=room_type_options,
+                index=0 if is_new_room else room_type_options.index(selected_room.room_type.value),
+                help="Type/category of the room"
+            )
 
-    if st.button("💾 Save Rooms to CSV", use_container_width=True, type="primary"): # Changed button text
-        with st.spinner("Saving Rooms..."): # Changed spinner text
-            try:
-                # Convert edited DF back to a dictionary of Room objects for validation
-                updated_rooms = {} # Changed variable name
-                for _, row in edited_df.iterrows():
-                    room_id = row["Room_ID"]
-                    if not room_id:
-                        st.error("Room ID cannot be empty. Please correct and save again.") # Changed error message
-                        return
-                    if room_id in updated_rooms: # Changed variable name
-                        st.error(f"Duplicate Room ID '{room_id}' found. IDs must be unique.") # Changed error message
-                        return
+        with col2:
+            current_occupancy_units = st.number_input(
+                "Current Occupancy (Units)",
+                min_value=0.0,
+                value=0.0 if is_new_room else selected_room.current_occupancy_units,
+                step=1.0,
+                help="Current occupancy level in units"
+            )
+            
+            status = st.selectbox(
+                "Status",
+                options=resource_status_options,
+                index=0 if is_new_room else resource_status_options.index(selected_room.status.value),
+                help="Current operational status"
+            )
+
+        # Supported SKUs input
+        supported_skus_str = st.text_area(
+            "Supported SKUs (comma-separated)",
+            value="" if is_new_room else ", ".join(selected_room.supported_skus),
+            help="List of SKUs that can be produced in this room, separated by commas"
+        )
+
+        # Form submission buttons
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if is_new_room:
+                save_button = st.form_submit_button("🆕 Create New Room", type="primary")
+            else:
+                save_button = st.form_submit_button("💾 Save Changes", type="primary")
+
+        with col2:
+            if not is_new_room:
+                # We'll handle delete outside the form since form_submit_button has limitations
+                pass
+
+        # Handle form submission
+        if save_button:
+            # Validation
+            if not room_id or not room_id.strip():
+                st.error("Room ID cannot be empty.")
+            elif is_new_room and room_id in st.session_state.room_config:
+                st.error(f"Room ID '{room_id}' already exists. Please choose a different ID.")
+            else:
+                try:
+                    # Process supported SKUs
+                    supported_skus = [sku.strip() for sku in supported_skus_str.split(',') if sku.strip()]
                     
-                    # Handle Supported_SKUs: split string by comma and strip whitespace
-                    supported_skus = [sku.strip() for sku in str(row["Supported_SKUs"]).split(',') if sku.strip()]
-
-                    # Handle Room_Type: convert string back to RoomType enum
-                    try:
-                        room_type_enum = RoomType(row["Room_Type"])
-                    except ValueError:
-                        st.error(f"Invalid Room Type for Room ID '{room_id}'. Please select a valid type.")
-                        return
-
-                    # Handle Status: convert string back to ResourceStatus enum
-                    try:
-                        status_enum = ResourceStatus(row["Status"])
-                    except ValueError:
-                        st.error(f"Invalid Status for Room ID '{room_id}'. Please select a valid status.")
-                        return
+                    # Convert enums
+                    room_type_enum = RoomType(room_type)
+                    status_enum = ResourceStatus(status)
                     
-                    # Handle optional float columns (Temperature, Humidity)
-
-                    updated_rooms[room_id] = Room( # Changed class and variable name
+                    # Create/update room object
+                    room_obj = Room(
                         room_id=room_id,
-                        capacity_units=float(row["Capacity_Units"]),
+                        capacity_units=float(capacity_units),
                         supported_skus=supported_skus,
                         room_type=room_type_enum,
-                        current_occupancy_units=float(row["Current_Occupancy_Units"]),
+                        current_occupancy_units=float(current_occupancy_units),
                         status=status_enum,
                     )
+                    
+                    # Update session state
+                    st.session_state.room_config[room_id] = room_obj
+                    
+                    if is_new_room:
+                        st.success(f"✅ Room '{room_id}' created successfully!")
+                    else:
+                        st.success(f"✅ Room '{room_id}' updated successfully!")
+                    
+                    st.rerun()
+                    
+                except ValueError as e:
+                    st.error(f"Invalid value: {e}")
+                except Exception as e:
+                    st.error(f"Error saving room: {e}")
 
-                # Get file path and save
-                file_path = data_loader.data_dir / "room_config.csv" # Changed file name
-                df_to_save = pd.DataFrame([room._to_dict() for room in updated_rooms.values()]) # Changed variable name
+    # Delete button (outside form to avoid form submission conflicts)
+    if not is_new_room and selected_room:
+        st.markdown("---")
+        col1, col2, col3 = st.columns([1, 1, 2])
+        with col1:
+            if st.button("🗑️ Delete Selected Room", type="secondary"):
+                # Use a confirmation dialog
+                st.session_state.show_delete_confirmation = True
+        
+        # Handle delete confirmation
+        if st.session_state.get('show_delete_confirmation', False):
+            st.warning(f"Are you sure you want to delete room '{selected_option}'?")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✅ Yes, Delete", type="primary"):
+                    del st.session_state.room_config[selected_option]
+                    st.session_state.show_delete_confirmation = False
+                    st.success(f"Room '{selected_option}' deleted successfully!")
+                    st.rerun()
+            with col2:
+                if st.button("❌ Cancel"):
+                    st.session_state.show_delete_confirmation = False
+                    st.rerun()
+
+    # Display current rooms summary
+    if st.session_state.room_config:
+        st.markdown("---")
+        st.markdown("### Current Rooms Summary")
+        
+        # Create summary dataframe
+        summary_data = []
+        for room_id, room in st.session_state.room_config.items():
+            summary_data.append({
+                "Room ID": room.room_id,
+                "Type": room.room_type.value,
+                "Capacity": room.capacity_units,
+                "Current Occupancy": room.current_occupancy_units,
+                "Status": room.status.value,
+                "Supported SKUs": len(room.supported_skus)
+            })
+        
+        summary_df = pd.DataFrame(summary_data)
+        st.dataframe(summary_df, use_container_width=True)
+
+    # Save to CSV button
+    st.markdown("---")
+    if st.button("💾 Save All Changes to CSV", use_container_width=True, type="primary", key= 'save_rooms_changes'):
+        with st.spinner("Saving Rooms to CSV..."):
+            try:
+                # Validate all rooms before saving
+                for room_id, room in st.session_state.room_config.items():
+                    if not room_id:
+                        st.error("Found room with empty ID. Please correct before saving.")
+                        return
+
+                # Save to CSV
+                file_path = data_loader.data_dir / "room_config.csv"
+                df_to_save = pd.DataFrame([room._to_dict() for room in st.session_state.room_config.values()])
                 df_to_save.to_csv(file_path, index=False)
                 
-                st.success("✅ Room configuration saved successfully!") # Changed success message
+                st.success("✅ All room configurations saved to CSV successfully!")
 
                 # Reload data to reflect changes
-                config.ROOMS = data_loader.load_rooms_with_fallback() # Changed config and loader method
-                st.session_state.room_config = config.ROOMS.copy() # Changed session state key and config
-                st.rerun()
+                config.ROOMS = data_loader.load_rooms_with_fallback()
+                st.session_state.room_config = config.ROOMS.copy()
 
             except Exception as e:
-                st.error(f"❌ Error saving Room data: {e}") # Changed error message
+                st.error(f"❌ Error saving room data to CSV: {e}")
+
+    # Show current count
+    st.markdown(f"**Total Rooms:** {len(st.session_state.room_config)}")

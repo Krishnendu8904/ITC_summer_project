@@ -1,0 +1,186 @@
+2025-06-13 16:03:13,463 - root - INFO - Application starting, logging configured.
+2025-06-13 16:03:13,468 - utils.data_loader - INFO - Loading all production data...
+2025-06-13 16:03:14,960 - utils.data_loader - INFO - Loaded 0 SKUs
+2025-06-13 16:03:16,687 - utils.data_loader - INFO - Loaded 4 production lines
+2025-06-13 16:03:18,200 - utils.data_loader - INFO - Loaded 0 storage tanks
+2025-06-13 16:03:19,431 - utils.data_loader - INFO - Loaded 3 work shifts
+2025-06-13 16:03:20,450 - utils.data_loader - INFO - Loaded 5 user indents
+2025-06-13 16:03:21,305 - utils.data_loader - INFO - Loaded 3 equipment items
+2025-06-13 16:03:22,114 - utils.data_loader - INFO - Loaded 2 rooms
+2025-06-13 16:03:22,142 - utils.data_loader - INFO - Loaded 2 product definitions
+2025-06-13 16:03:22,992 - utils.data_loader - INFO - Loaded 3 CIP circuits
+2025-06-13 16:03:22,992 - utils.data_loader - WARNING - File line_sku.csv not found at /Users/krishnenduchowdhury/Desktop/Production Scheduler/data/line_sku.csv
+2025-06-13 16:03:22,995 - utils.data_loader - WARNING - Data validation warnings: ["Invalid SKU row: {'SKU_ID': 'CUPSEL200', 'Product_Category': 'CURD', 'Variant': 'SELECT', 'Inventory_Size': 1.0} - SKU.__init__() got an unexpected keyword argument 'variant'", "Invalid SKU row: {'SKU_ID': 'CUPSEL400', 'Product_Category': 'CURD', 'Variant': 'SELECT', 'Inventory_Size': 1.0} - SKU.__init__() got an unexpected keyword argument 'variant'", "Invalid SKU row: {'SKU_ID': 'CUPLOF200', 'Product_Category': 'CURD', 'Variant': 'LOW_FAT', 'Inventory_Size': 1.0} - SKU.__init__() got an unexpected keyword argument 'variant'", "Invalid SKU row: {'SKU_ID': 'CUPLOF400', 'Product_Category': 'CURD', 'Variant': 'LOW_FAT', 'Inventory_Size': 1.0} - SKU.__init__() got an unexpected keyword argument 'variant'", "Invalid SKU row: {'SKU_ID': 'MISDOI85G', 'Product_Category': 'MISHTI_DOI', 'Variant': 'TRADITIONAL', 'Inventory_Size': 1.0} - SKU.__init__() got an unexpected keyword argument 'variant'", "Invalid SKU row: {'SKU_ID': 'PCHSEL400', 'Product_Category': 'POUCH_CURD', 'Variant': 'SELECT', 'Inventory_Size': 1.0} - SKU.__init__() got an unexpected keyword argument 'variant'", "Errors for 'CUPLINE-1' Compatible SKUs Max Production: SKU ID 'CUPSEL200' not found in SKU configurations.; SKU ID 'CUPSEL400' not found in SKU configurations.", "Errors for 'MISHTI_LINE-1' Compatible SKUs Max Production: SKU ID 'MISDOI85G' not found in SKU configurations.", "Errors for 'POUCH_PACKING_LINE' Compatible SKUs Max Production: Invalid format 'nan'. Expected 'SKU_ID:Rate'.", "Errors for 'BUCKETLINE-1' Compatible SKUs Max Production: Invalid format 'nan'. Expected 'SKU_ID:Rate'.", "Invalid Tank row: {'Tank_ID': 'LT-1', 'Capacity_Liters': 5000.0, 'Compatible_Product_Categories': 'CURD', 'Status': 'Idle', 'Tank_Type': 'Processing Tank', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 60, 'CIP_Circuit': 'CIRCUIT-1'} - 'Processing Tank' is not a valid TankType", "Invalid Tank row: {'Tank_ID': 'LT-2', 'Capacity_Liters': 5000.0, 'Compatible_Product_Categories': 'CURD', 'Status': 'Idle', 'Tank_Type': 'Processing Tank', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 60, 'CIP_Circuit': 'CIRCUIT-1'} - 'Processing Tank' is not a valid TankType", "Invalid Tank row: {'Tank_ID': 'LT-3', 'Capacity_Liters': 5000.0, 'Compatible_Product_Categories': 'CURD', 'Status': 'Idle', 'Tank_Type': 'Storage', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 45, 'CIP_Circuit': 'CIRCUIT-2'} - 'Storage' is not a valid TankType", "Invalid Tank row: {'Tank_ID': 'LT-4', 'Capacity_Liters': 2000.0, 'Compatible_Product_Categories': 'MISHTI_DOI', 'Status': 'Idle', 'Tank_Type': 'Processing Tank', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 90, 'CIP_Circuit': 'CIRCUIT-3'} - 'Processing Tank' is not a valid TankType", "Invalid Room row: {'Room_ID': 'BLAST_CHILLER-1', 'Capacity_Units': 500.0, 'Supported_SKUs': nan, 'Room_Type': 'Blast Chilling', 'Current_Occupancy_Units': 0.0, 'Status': 'Active', 'Temperature_Celsius': 2.0, 'Humidity_Percent': nan} - 'Blast Chilling' is not a valid RoomType", "Invalid Product row: {'Product_Category': 'CURD', 'Step_ID': 'CURD_MIXING', 'Step_Name': 'Milk Mixing', 'Resource_Type': 'Equipment', 'Duration_Minutes_Per_Batch': 30.0, 'Min_Capacity_Required_Liters': 1000.0, 'Compatible_Resource_IDs': 'MIXER-1', 'Requires_Setup': True, 'Requires_CIP_After': True} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'CURD', 'Step_ID': 'CURD_PASTEURIZATION', 'Step_Name': 'Pasteurization', 'Resource_Type': 'Equipment', 'Duration_Minutes_Per_Batch': 45.0, 'Min_Capacity_Required_Liters': 1000.0, 'Compatible_Resource_IDs': 'PASTEURIZER-1', 'Requires_Setup': True, 'Requires_CIP_After': True} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'CURD', 'Step_ID': 'CURD_INCUBATION', 'Step_Name': 'Incubation', 'Resource_Type': 'Room', 'Duration_Minutes_Per_Batch': 480.0, 'Min_Capacity_Required_Liters': 0.0, 'Compatible_Resource_IDs': 'INCUBATOR-1', 'Requires_Setup': False, 'Requires_CIP_After': False} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'CURD', 'Step_ID': 'CURD_PACKAGING', 'Step_Name': 'Packaging', 'Resource_Type': 'Line', 'Duration_Minutes_Per_Batch': 60.0, 'Min_Capacity_Required_Liters': 0.0, 'Compatible_Resource_IDs': nan, 'Requires_Setup': True, 'Requires_CIP_After': True} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'MISHTI_DOI', 'Step_ID': 'MISHTI_MIXING', 'Step_Name': 'Sweetened Milk Mixing', 'Resource_Type': 'Equipment', 'Duration_Minutes_Per_Batch': 45.0, 'Min_Capacity_Required_Liters': 500.0, 'Compatible_Resource_IDs': 'MIXER-1', 'Requires_Setup': True, 'Requires_CIP_After': True} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'MISHTI_DOI', 'Step_ID': 'MISHTI_PASTEURIZATION', 'Step_Name': 'Pasteurization', 'Resource_Type': 'Equipment', 'Duration_Minutes_Per_Batch': 60.0, 'Min_Capacity_Required_Liters': 500.0, 'Compatible_Resource_IDs': 'PASTEURIZER-1', 'Requires_Setup': True, 'Requires_CIP_After': True} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'MISHTI_DOI', 'Step_ID': 'MISHTI_INCUBATION', 'Step_Name': 'Sweet Incubation', 'Resource_Type': 'Room', 'Duration_Minutes_Per_Batch': 360.0, 'Min_Capacity_Required_Liters': 0.0, 'Compatible_Resource_IDs': 'INCUBATOR-1', 'Requires_Setup': False, 'Requires_CIP_After': False} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'MISHTI_DOI', 'Step_ID': 'MISHTI_CHILLING', 'Step_Name': 'Blast Chilling', 'Resource_Type': 'Room', 'Duration_Minutes_Per_Batch': 120.0, 'Min_Capacity_Required_Liters': 0.0, 'Compatible_Resource_IDs': 'BLAST_CHILLER-1', 'Requires_Setup': False, 'Requires_CIP_After': False} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", "Invalid Product row: {'Product_Category': 'MISHTI_DOI', 'Step_ID': 'MISHTI_PACKAGING', 'Step_Name': 'Packaging', 'Resource_Type': 'Line', 'Duration_Minutes_Per_Batch': 45.0, 'Min_Capacity_Required_Liters': 0.0, 'Compatible_Resource_IDs': 'MISHTI_LINE-1', 'Requires_Setup': True, 'Requires_CIP_After': True} - ProcessingStep.__init__() missing 1 required positional argument: 'process_kind'", 'SKU ID CUPSEL200 not found while processing compatibility', 'SKU ID CUPSEL400 not found while processing compatibility', 'SKU ID CUPMID200 not found while processing compatibility', 'SKU ID PCHSEL400 not found while processing compatibility', 'SKU ID BUCLOF1KG not found while processing compatibility']
+2025-06-13 16:03:22,995 - utils.data_loader - INFO - All data loaded successfully
+2025-06-13 16:03:22,998 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-13 16:04:09,118 - root - INFO - Application starting, logging configured.
+2025-06-13 16:16:19,821 - root - INFO - Application starting, logging configured.
+2025-06-13 16:16:51,992 - root - INFO - Application starting, logging configured.
+2025-06-13 16:18:32,485 - root - INFO - Application starting, logging configured.
+2025-06-13 16:18:47,294 - root - INFO - Application starting, logging configured.
+2025-06-13 16:18:51,750 - root - INFO - Application starting, logging configured.
+2025-06-13 16:18:51,909 - root - INFO - Application starting, logging configured.
+2025-06-13 16:18:51,946 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:19:03,044 - root - INFO - Application starting, logging configured.
+2025-06-13 16:19:03,154 - root - INFO - Application starting, logging configured.
+2025-06-13 16:19:04,850 - root - INFO - Application starting, logging configured.
+2025-06-13 16:19:04,885 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:27:25,947 - root - INFO - Application starting, logging configured.
+2025-06-13 16:31:16,627 - root - INFO - Application starting, logging configured.
+2025-06-13 16:31:16,731 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:40:28,981 - root - INFO - Application starting, logging configured.
+2025-06-13 16:41:40,222 - root - INFO - Application starting, logging configured.
+2025-06-13 16:41:51,060 - root - INFO - Application starting, logging configured.
+2025-06-13 16:41:51,151 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:43:07,527 - root - INFO - Application starting, logging configured.
+2025-06-13 16:44:00,211 - root - INFO - Application starting, logging configured.
+2025-06-13 16:44:09,593 - root - INFO - Application starting, logging configured.
+2025-06-13 16:44:09,646 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:46:04,419 - root - INFO - Application starting, logging configured.
+2025-06-13 16:46:09,447 - root - INFO - Application starting, logging configured.
+2025-06-13 16:46:09,500 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:49:27,540 - root - INFO - Application starting, logging configured.
+2025-06-13 16:49:30,010 - root - INFO - Application starting, logging configured.
+2025-06-13 16:49:30,065 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:49:30,066 - utils.data_loader - INFO - Sample Data Loaded Successfully
+2025-06-13 16:52:18,457 - root - INFO - Application starting, logging configured.
+2025-06-13 16:54:57,090 - root - INFO - Application starting, logging configured.
+2025-06-13 16:55:08,412 - root - INFO - Application starting, logging configured.
+2025-06-13 16:55:18,927 - root - INFO - Application starting, logging configured.
+2025-06-13 16:55:22,418 - root - INFO - Application starting, logging configured.
+2025-06-13 16:56:11,032 - root - INFO - Application starting, logging configured.
+2025-06-13 16:57:01,412 - root - INFO - Application starting, logging configured.
+2025-06-13 16:57:18,856 - root - INFO - Application starting, logging configured.
+2025-06-13 16:58:12,114 - root - INFO - Application starting, logging configured.
+2025-06-13 16:58:12,260 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 16:58:12,261 - utils.data_loader - INFO - Sample Data Loaded Successfully
+2025-06-13 16:58:22,632 - root - INFO - Application starting, logging configured.
+2025-06-13 16:58:22,661 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 16:58:22,661 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 16:59:09,869 - root - INFO - Application starting, logging configured.
+2025-06-13 16:59:14,620 - root - INFO - Application starting, logging configured.
+2025-06-13 16:59:14,642 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 16:59:14,642 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 16:59:59,086 - root - INFO - Application starting, logging configured.
+2025-06-13 17:00:28,075 - root - INFO - Application starting, logging configured.
+2025-06-13 17:00:30,473 - root - INFO - Application starting, logging configured.
+2025-06-13 17:00:30,501 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:00:30,501 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:05:23,236 - root - INFO - Application starting, logging configured.
+2025-06-13 17:05:26,987 - root - INFO - Application starting, logging configured.
+2025-06-13 17:05:27,014 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:05:27,015 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:05:43,365 - root - INFO - Application starting, logging configured.
+2025-06-13 17:05:44,548 - root - INFO - Application starting, logging configured.
+2025-06-13 17:05:44,560 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:05:44,560 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:05:52,139 - root - INFO - Application starting, logging configured.
+2025-06-13 17:05:53,278 - root - INFO - Application starting, logging configured.
+2025-06-13 17:05:53,285 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:05:53,286 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:06:03,424 - root - INFO - Application starting, logging configured.
+2025-06-13 17:06:04,835 - root - INFO - Application starting, logging configured.
+2025-06-13 17:06:04,858 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:06:04,858 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:06:30,605 - root - INFO - Application starting, logging configured.
+2025-06-13 17:06:31,231 - root - INFO - Application starting, logging configured.
+2025-06-13 17:06:31,252 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:06:31,252 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:06:39,336 - root - INFO - Application starting, logging configured.
+2025-06-13 17:06:43,137 - root - INFO - Application starting, logging configured.
+2025-06-13 17:06:43,154 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:06:43,154 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:07:37,566 - root - INFO - Application starting, logging configured.
+2025-06-13 17:07:48,828 - root - INFO - Application starting, logging configured.
+2025-06-13 17:07:48,894 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:07:48,894 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:08:34,313 - root - INFO - Application starting, logging configured.
+2025-06-13 17:08:37,870 - root - INFO - Application starting, logging configured.
+2025-06-13 17:08:37,888 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:08:37,888 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:09:48,531 - root - INFO - Application starting, logging configured.
+2025-06-13 17:09:51,334 - root - INFO - Application starting, logging configured.
+2025-06-13 17:09:51,357 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:09:51,357 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:10:14,605 - root - INFO - Application starting, logging configured.
+2025-06-13 17:10:16,059 - root - INFO - Application starting, logging configured.
+2025-06-13 17:10:16,074 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:10:16,075 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:11:43,915 - root - INFO - Application starting, logging configured.
+2025-06-13 17:11:49,456 - root - INFO - Application starting, logging configured.
+2025-06-13 17:11:49,485 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:11:49,485 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:14:38,917 - root - INFO - Application starting, logging configured.
+2025-06-13 17:14:41,342 - root - INFO - Application starting, logging configured.
+2025-06-13 17:14:41,366 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:14:41,366 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:24:29,062 - root - INFO - Application starting, logging configured.
+2025-06-13 17:24:32,127 - root - INFO - Application starting, logging configured.
+2025-06-13 17:24:32,145 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:24:32,145 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:26:37,738 - root - INFO - Application starting, logging configured.
+2025-06-13 17:26:37,782 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:26:37,782 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:33:07,846 - root - INFO - Application starting, logging configured.
+2025-06-13 17:35:56,077 - root - INFO - Application starting, logging configured.
+2025-06-13 17:35:56,504 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:35:56,504 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:20,491 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:20,518 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:36:20,518 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:32,046 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:34,567 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:34,568 - utils.data_loader - INFO - Loading all production data...
+2025-06-13 17:36:34,571 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:36:34,571 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:34,582 - utils.data_loader - INFO - Loaded 4 production lines
+2025-06-13 17:36:34,584 - utils.data_loader - INFO - Loaded 0 storage tanks
+2025-06-13 17:36:34,586 - utils.data_loader - INFO - Loaded 3 work shifts
+2025-06-13 17:36:34,595 - utils.data_loader - INFO - Loaded 5 user indents
+2025-06-13 17:36:34,605 - utils.data_loader - INFO - Loaded 3 equipment items
+2025-06-13 17:36:34,613 - utils.data_loader - INFO - Loaded 2 rooms
+2025-06-13 17:36:34,616 - utils.data_loader - INFO - Loaded 2 product definitions
+2025-06-13 17:36:34,618 - utils.data_loader - INFO - Loaded 3 CIP circuits
+2025-06-13 17:36:34,618 - utils.data_loader - WARNING - File line_sku.csv not found at /Users/krishnenduchowdhury/Desktop/Production Scheduler/data/line_sku.csv
+2025-06-13 17:36:34,619 - utils.data_loader - WARNING - Data validation warnings: ["Errors for 'CUPLINE-1' Compatible SKUs Max Production: SKU ID 'CUPSEL200' not found in SKU configurations.; SKU ID 'CUPSEL400' not found in SKU configurations.", "Errors for 'MISHTI_LINE-1' Compatible SKUs Max Production: SKU ID 'MISDOI85G' not found in SKU configurations.", "Errors for 'POUCH_PACKING_LINE' Compatible SKUs Max Production: Invalid format 'nan'. Expected 'SKU_ID:Rate'.", "Errors for 'BUCKETLINE-1' Compatible SKUs Max Production: Invalid format 'nan'. Expected 'SKU_ID:Rate'.", "Invalid Tank row: {'Tank_ID': 'LT-1', 'Capacity_Liters': 5000.0, 'Compatible_Product_Categories': 'CURD', 'Status': 'Idle', 'Tank_Type': 'Processing Tank', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 60, 'CIP_Circuit': 'CIRCUIT-1'} - 'Processing Tank' is not a valid TankType", "Invalid Tank row: {'Tank_ID': 'LT-2', 'Capacity_Liters': 5000.0, 'Compatible_Product_Categories': 'CURD', 'Status': 'Idle', 'Tank_Type': 'Processing Tank', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 60, 'CIP_Circuit': 'CIRCUIT-1'} - 'Processing Tank' is not a valid TankType", "Invalid Tank row: {'Tank_ID': 'LT-3', 'Capacity_Liters': 5000.0, 'Compatible_Product_Categories': 'CURD', 'Status': 'Idle', 'Tank_Type': 'Storage', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 45, 'CIP_Circuit': 'CIRCUIT-2'} - 'Storage' is not a valid TankType", "Invalid Tank row: {'Tank_ID': 'LT-4', 'Capacity_Liters': 2000.0, 'Compatible_Product_Categories': 'MISHTI_DOI', 'Status': 'Idle', 'Tank_Type': 'Processing Tank', 'Current_Product_Category': nan, 'Current_Volume_Liters': 0.0, 'CIP_Duration_Min': 90, 'CIP_Circuit': 'CIRCUIT-3'} - 'Processing Tank' is not a valid TankType", "Invalid Room row: {'Room_ID': 'BLAST_CHILLER-1', 'Capacity_Units': 500.0, 'Supported_SKUs': nan, 'Room_Type': 'Blast Chilling', 'Current_Occupancy_Units': 0.0, 'Status': 'Active', 'Temperature_Celsius': 2.0, 'Humidity_Percent': nan} - 'Blast Chilling' is not a valid RoomType", 'SKU ID CUPSEL200 not found while processing compatibility', 'SKU ID CUPSEL400 not found while processing compatibility', 'SKU ID CUPMID200 not found while processing compatibility', 'SKU ID PCHSEL400 not found while processing compatibility', 'SKU ID BUCLOF1KG not found while processing compatibility']
+2025-06-13 17:36:34,619 - utils.data_loader - INFO - All data loaded successfully
+2025-06-13 17:36:34,621 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-13 17:36:34,684 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 17:36:34,685 - utils.data_loader - INFO - Sample Data Loaded Successfully
+2025-06-13 17:36:37,769 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:37,783 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:36:37,783 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:37,844 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:40,960 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:40,979 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:36:40,980 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:41,064 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:53,829 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:55,782 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:55,798 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:36:55,798 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:55,853 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:57,286 - root - INFO - Application starting, logging configured.
+2025-06-13 17:36:57,299 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:36:57,299 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:36:57,398 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:12,988 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:13,449 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:15,420 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:15,476 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 17:37:15,477 - utils.data_loader - INFO - Sample Data Loaded Successfully
+2025-06-13 17:37:20,151 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:20,181 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:37:20,182 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:37:20,291 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:21,848 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:21,860 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-13 17:37:21,860 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-13 17:37:21,912 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:34,003 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:36,672 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:39,540 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:40,784 - root - INFO - Application starting, logging configured.
+2025-06-13 17:37:40,823 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
+2025-06-13 17:37:40,823 - utils.data_loader - INFO - Sample Data Loaded Successfully
+2025-06-13 17:39:29,104 - root - INFO - Application starting, logging configured.

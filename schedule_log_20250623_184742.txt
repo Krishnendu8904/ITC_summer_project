@@ -1,0 +1,65 @@
+================================================================================
+                         FINAL PRODUCTION SCHEDULE LOG
+================================================================================
+Report Generated: 2025-06-23 18:47:42
+Schedule Start Time: 2025-06-24 08:00:00
+Solver Status: OPTIMAL
+Objective Value: 9978200.00
+
+================================================================================
+ CHRONOLOGICAL FULL-FACTORY SCHEDULE
+================================================================================
+
+[06-24 08:00 -> 06-24 16:00] TASK                 | Resource: MST-1                | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-MST-STANDARDISATION
+[06-24 16:00 -> 06-25 00:00] TASK                 | Resource: MST-1                | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-MST-STANDARDISATION
+[06-24 16:00 -> 06-24 17:38] TASK                 | Resource: PST-1                | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-PAST
+[06-24 17:38 -> 06-24 18:08] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-LT-STANDARDISATION
+[06-24 18:08 -> 06-24 18:38] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-INOCULATION
+[06-24 18:38 -> 06-24 20:48] TASK                 | Resource: CRD-HTR-1            | ORD_101 | BKT-SEL | Batch 0 | Step: SEL-CRD-PACKING
+[06-24 20:48 -> 06-24 22:18] TASK                 | Resource: CRD-HTR-1            | ORD_201 | CUP-SEL | Batch 1 | Step: SEL-CRD-PACKING
+[06-24 22:18 -> 06-25 02:40] TASK                 | Resource: CRD-HTR-1            | ORD_101 | BKT-SEL | Batch 1 | Step: SEL-CRD-PACKING
+[06-25 00:00 -> 06-25 01:38] TASK                 | Resource: PST-1                | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-PAST
+[06-25 01:38 -> 06-25 02:08] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-LT-STANDARDISATION
+[06-25 02:08 -> 06-25 02:38] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-INOCULATION
+[06-25 02:40 -> 06-25 04:10] TASK                 | Resource: CRD-HTR-1            | ORD_201 | CUP-SEL | Batch 0 | Step: SEL-CRD-PACKING
+
+
+================================================================================
+ SCHEDULE BY RESOURCE
+================================================================================
+
+--- Resource: CRD-HTR-1 ---
+  [06-24 18:38 -> 06-24 20:48] (130 min) | Task: ORD_101_0_SEL-CRD-PACKING
+  [06-24 20:48 -> 06-24 22:18] ( 90 min) | Task: ORD_201_1_SEL-CRD-PACKING
+  [06-24 22:18 -> 06-25 02:40] (262 min) | Task: ORD_101_1_SEL-CRD-PACKING
+  [06-25 02:40 -> 06-25 04:10] ( 90 min) | Task: ORD_201_0_SEL-CRD-PACKING
+  Resource Utilization: 10.1%
+
+--- Resource: LT-2 ---
+  [06-24 17:38 -> 06-24 18:08] ( 30 min) | Task: SELECT-CURD_1_SEL-CRD-LT-STANDARDISATION
+  [06-24 18:08 -> 06-24 18:38] ( 30 min) | Task: SELECT-CURD_1_SEL-CRD-INOCULATION
+  [06-25 01:38 -> 06-25 02:08] ( 30 min) | Task: SELECT-CURD_0_SEL-CRD-LT-STANDARDISATION
+  [06-25 02:08 -> 06-25 02:38] ( 30 min) | Task: SELECT-CURD_0_SEL-CRD-INOCULATION
+  Resource Utilization: 2.1%
+
+--- Resource: MST-1 ---
+  [06-24 08:00 -> 06-24 16:00] (480 min) | Task: SELECT-CURD_1_SEL-CRD-MST-STANDARDISATION
+  [06-24 16:00 -> 06-25 00:00] (480 min) | Task: SELECT-CURD_0_SEL-CRD-MST-STANDARDISATION
+  Resource Utilization: 17.0%
+
+--- Resource: PST-1 ---
+  [06-24 16:00 -> 06-24 17:38] ( 98 min) | Task: SELECT-CURD_1_SEL-CRD-PAST
+  [06-25 00:00 -> 06-25 01:38] ( 98 min) | Task: SELECT-CURD_0_SEL-CRD-PAST
+  Resource Utilization: 3.5%
+
+
+================================================================================
+ PRODUCTION FULFILLMENT SUMMARY
+================================================================================
+
+Order: ORD_201    | Required: 2500.0L | Produced: 2550 L | Status: 102.0% Fulfilled (OVER by 50L)
+Order: ORD_101    | Required: 7000.0L | Produced: 7055 L | Status: 100.8% Fulfilled (OVER by 55L)
+
+================================================================================
+END OF REPORT
+================================================================================

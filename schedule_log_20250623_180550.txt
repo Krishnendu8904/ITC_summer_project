@@ -1,0 +1,94 @@
+================================================================================
+                         FINAL PRODUCTION SCHEDULE LOG
+================================================================================
+Report Generated: 2025-06-23 18:05:50
+Schedule Start Time: 2025-06-24 08:00:00
+Solver Status: OPTIMAL
+Objective Value: -26703644300.00
+
+================================================================================
+ CHRONOLOGICAL FULL-FACTORY SCHEDULE
+================================================================================
+
+[06-24 08:00 -> 06-24 16:00] TASK                 | Resource: MST-1                | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-MST-STANDARDISATION
+[06-24 08:00 -> 06-24 16:00] TASK                 | Resource: MST-2                | POUCH-CURD | POUCH-CURD | Batch 0 | Step: CRD-MST-STANDARDISATION
+[06-24 16:00 -> 06-25 00:00] TASK                 | Resource: MST-1                | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-MST-STANDARDISATION
+[06-24 16:00 -> 06-24 17:38] TASK                 | Resource: PST-1                | POUCH-CURD | POUCH-CURD | Batch 0 | Step: CRD-PAST
+[06-24 17:38 -> 06-24 18:08] TASK                 | Resource: LT-3, LT-4           | POUCH-CURD | POUCH-CURD | Batch 0 | Step: CRD-LT-STANDARDISATION
+[06-24 17:38 -> 06-24 18:38] -- CLEANING (CIP) -- | Resource: PST-1                | Duration: 60 mins
+[06-24 18:08 -> 06-24 18:38] TASK                 | Resource: LT-3, LT-4           | POUCH-CURD | POUCH-CURD | Batch 0 | Step: CRD-INOCULATION
+[06-24 18:38 -> 06-24 20:08] TASK                 | Resource: PST-1                | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-PAST
+[06-24 18:38 -> 06-24 22:52] TASK                 | Resource: CRD-HTR-1            | ORD_102 | PCH-CRD | Batch 0 | Step: CRD-POUCH-PACKING
+[06-24 18:38 -> 06-24 19:38] -- CLEANING (CIP) -- | Resource: PST-1                | Duration: 60 mins
+[06-24 20:08 -> 06-24 20:38] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-LT-STANDARDISATION
+[06-24 20:38 -> 06-24 21:08] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 1 | Step: SEL-CRD-INOCULATION
+[06-24 22:52 -> 06-24 23:52] -- CLEANING (CIP) -- | Resource: CRD-HTR-1            | Duration: 60 mins
+[06-24 23:52 -> 06-25 03:50] TASK                 | Resource: CRD-HTR-1            | ORD_101 | BKT-SEL | Batch 1 | Step: SEL-CRD-PACKING
+[06-24 23:52 -> 06-25 00:52] -- CLEANING (CIP) -- | Resource: CRD-HTR-1            | Duration: 60 mins
+[06-25 00:00 -> 06-25 01:22] TASK                 | Resource: PST-1                | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-PAST
+[06-25 00:52 -> 06-25 01:52] -- CLEANING (CIP) -- | Resource: CRD-HTR-1            | Duration: 60 mins
+[06-25 01:30 -> 06-25 02:00] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-LT-STANDARDISATION
+[06-25 01:52 -> 06-25 02:52] -- CLEANING (CIP) -- | Resource: CRD-HTR-1            | Duration: 60 mins
+[06-25 02:00 -> 06-25 02:30] TASK                 | Resource: LT-2                 | SELECT-CURD | SELECT-CURD | Batch 0 | Step: SEL-CRD-INOCULATION
+[06-25 03:50 -> 06-25 04:36] TASK                 | Resource: CRD-HTR-1            | ORD_101 | BKT-SEL | Batch 0 | Step: SEL-CRD-PACKING
+[06-25 04:36 -> 06-25 05:42] TASK                 | Resource: CRD-HTR-1            | ORD_201 | CUP-SEL | Batch 1 | Step: SEL-CRD-PACKING
+[06-25 05:42 -> 06-25 08:00] TASK                 | Resource: CRD-HTR-1            | ORD_201 | CUP-SEL | Batch 0 | Step: SEL-CRD-PACKING
+
+
+================================================================================
+ SCHEDULE BY RESOURCE
+================================================================================
+
+--- Resource: CRD-HTR-1 ---
+  [06-24 18:38 -> 06-24 22:52] (254 min) | Task: ORD_102_0_CRD-POUCH-PACKING
+  [06-24 22:52 -> 06-24 23:52] ( 60 min) | Task: Cleaning (CIP)
+  [06-24 23:52 -> 06-25 03:50] (238 min) | Task: ORD_101_1_SEL-CRD-PACKING
+  [06-24 23:52 -> 06-25 00:52] ( 60 min) | Task: Cleaning (CIP)
+  [06-25 00:52 -> 06-25 01:52] ( 60 min) | Task: Cleaning (CIP)
+  [06-25 01:52 -> 06-25 02:52] ( 60 min) | Task: Cleaning (CIP)
+  [06-25 03:50 -> 06-25 04:36] ( 46 min) | Task: ORD_101_0_SEL-CRD-PACKING
+  [06-25 04:36 -> 06-25 05:42] ( 66 min) | Task: ORD_201_1_SEL-CRD-PACKING
+  [06-25 05:42 -> 06-25 08:00] (138 min) | Task: ORD_201_0_SEL-CRD-PACKING
+  Resource Utilization: 17.4%
+
+--- Resource: LT-2 ---
+  [06-24 20:08 -> 06-24 20:38] ( 30 min) | Task: SELECT-CURD_1_SEL-CRD-LT-STANDARDISATION
+  [06-24 20:38 -> 06-24 21:08] ( 30 min) | Task: SELECT-CURD_1_SEL-CRD-INOCULATION
+  [06-25 01:30 -> 06-25 02:00] ( 30 min) | Task: SELECT-CURD_0_SEL-CRD-LT-STANDARDISATION
+  [06-25 02:00 -> 06-25 02:30] ( 30 min) | Task: SELECT-CURD_0_SEL-CRD-INOCULATION
+  Resource Utilization: 2.1%
+
+--- Resource: LT-3, LT-4 ---
+  [06-24 17:38 -> 06-24 18:08] ( 30 min) | Task: POUCH-CURD_0_CRD-LT-STANDARDISATION
+  [06-24 18:08 -> 06-24 18:38] ( 30 min) | Task: POUCH-CURD_0_CRD-INOCULATION
+  Resource Utilization: 1.1%
+
+--- Resource: MST-1 ---
+  [06-24 08:00 -> 06-24 16:00] (480 min) | Task: SELECT-CURD_1_SEL-CRD-MST-STANDARDISATION
+  [06-24 16:00 -> 06-25 00:00] (480 min) | Task: SELECT-CURD_0_SEL-CRD-MST-STANDARDISATION
+  Resource Utilization: 17.0%
+
+--- Resource: MST-2 ---
+  [06-24 08:00 -> 06-24 16:00] (480 min) | Task: POUCH-CURD_0_CRD-MST-STANDARDISATION
+  Resource Utilization: 8.5%
+
+--- Resource: PST-1 ---
+  [06-24 16:00 -> 06-24 17:38] ( 98 min) | Task: POUCH-CURD_0_CRD-PAST
+  [06-24 17:38 -> 06-24 18:38] ( 60 min) | Task: Cleaning (CIP)
+  [06-24 18:38 -> 06-24 20:08] ( 90 min) | Task: SELECT-CURD_1_SEL-CRD-PAST
+  [06-24 18:38 -> 06-24 19:38] ( 60 min) | Task: Cleaning (CIP)
+  [06-25 00:00 -> 06-25 01:22] ( 82 min) | Task: SELECT-CURD_0_SEL-CRD-PAST
+  Resource Utilization: 6.9%
+
+
+================================================================================
+ PRODUCTION FULFILLMENT SUMMARY
+================================================================================
+
+Order: ORD_201    | Required: 3000.0L | Produced: 3060 L | Status: 102.0% Fulfilled (OVER by 60L)
+Order: ORD_101    | Required: 7000.0L | Produced: 4760 L | Status: 68.0% Fulfilled (UNDER by 2240L)
+Order: ORD_102    | Required: 8000.0L | Produced: 4760 L | Status: 59.5% Fulfilled (UNDER by 3240L)
+
+================================================================================
+END OF REPORT
+================================================================================
