@@ -774,3 +774,166 @@
 2025-07-01 18:12:22,331 - OptimizerLogger - INFO - Testing with 4 orders...
 2025-07-01 18:12:22,335 - OptimizerLogger - INFO -   -> Result: FEASIBLE
 2025-07-01 18:12:22,336 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 18:30:07,437 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 18:30:07,441 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 18:30:07,441 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 18:30:19,179 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 18:30:21,928 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 18:30:21,928 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 18:30:21,928 - OptimizerLogger - WARNING - Category 'SELECT-CURD' exceeds cap. Total: 15000.0 L. Reducing...
+2025-07-01 18:30:21,928 - OptimizerLogger - INFO -   - Reducing order ORD_201 by 2500.0 L.
+2025-07-01 18:30:21,928 - OptimizerLogger - INFO -   - Reducing order ORD_101 by 2500.0 L.
+2025-07-01 18:30:21,929 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 18:30:21,929 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 18:30:21,929 - OptimizerLogger - INFO - Testing with 4 orders...
+2025-07-01 18:30:21,929 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 18:30:21,930 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 18:30:50,429 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 18:30:51,473 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 18:30:51,473 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 18:30:51,473 - OptimizerLogger - WARNING - Category 'SELECT-CURD' exceeds cap. Total: 15000.0 L. Reducing...
+2025-07-01 18:30:51,474 - OptimizerLogger - INFO -   - Reducing order ORD_201 by 2500.0 L.
+2025-07-01 18:30:51,474 - OptimizerLogger - INFO -   - Reducing order ORD_101 by 2500.0 L.
+2025-07-01 18:30:51,475 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 18:30:51,475 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 18:30:51,475 - OptimizerLogger - INFO - Testing with 4 orders...
+2025-07-01 18:30:51,480 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 18:30:51,480 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 19:01:32,577 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 19:01:32,592 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:01:32,593 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 19:01:32,593 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 19:01:32,595 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 19:01:32,596 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 19:01:32,596 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 19:01:32,627 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 19:01:32,628 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 19:01:32,628 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 19:01:32,629 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 19:01:32,629 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 19:01:32,630 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 19:01:44,680 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:01:44,681 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 19:01:44,681 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 19:02:53,950 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:02:53,952 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 19:02:53,953 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 19:02:54,003 - utils.data_loader - INFO - Loaded 5 SKUs
+2025-07-01 19:03:22,584 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:03:22,600 - utils.data_loader - INFO - Loaded 5 SKUs
+2025-07-01 19:07:29,520 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:07:29,574 - utils.data_loader - INFO - Loaded 12 SKUs
+2025-07-01 19:07:29,576 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:07:29,577 - utils.data_loader - INFO - Loaded 12 SKUs
+2025-07-01 19:10:33,440 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:10:33,472 - utils.data_loader - INFO - Loaded 12 SKUs
+2025-07-01 19:10:41,780 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:10:41,790 - utils.data_loader - INFO - Loaded 12 SKUs
+2025-07-01 19:10:41,793 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:10:41,795 - utils.data_loader - INFO - Loaded 12 SKUs
+2025-07-01 19:22:33,460 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:22:33,511 - utils.data_loader - INFO - Loaded 16 SKUs
+2025-07-01 19:22:33,513 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:22:33,516 - utils.data_loader - INFO - Loaded 16 SKUs
+2025-07-01 19:26:27,414 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:26:27,484 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:26:27,487 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:26:27,490 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:03,183 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:03,211 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:03,245 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:03,371 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:03,374 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:08,306 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:08,317 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:09,820 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:09,823 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:09,891 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:09,894 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:11,801 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 19:27:11,814 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 19:27:11,870 - utils.data_loader - INFO - Loaded 4 product definitions
+2025-07-01 19:27:11,947 - utils.data_loader - INFO - Loaded 4 product definitions
+2025-07-01 19:27:11,950 - utils.data_loader - INFO - Loaded 20 SKUs
+2025-07-01 20:45:50,781 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 20:45:55,099 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 20:45:55,100 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 20:45:55,100 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 20:45:55,100 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 20:45:55,101 - OptimizerLogger - INFO - Testing with 4 orders...
+2025-07-01 20:45:55,102 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 20:45:55,102 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 20:46:02,529 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 20:46:06,046 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 20:46:06,047 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 20:46:06,047 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 20:46:06,047 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 20:46:06,047 - OptimizerLogger - INFO - Testing with 4 orders...
+2025-07-01 20:46:06,048 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 20:46:06,048 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 21:11:54,226 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:11:54,236 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:12:07,384 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:12:07,397 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:12:07,434 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 21:12:07,447 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:12:07,451 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:12:07,451 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 21:12:07,456 - utils.data_loader - INFO - Loaded 8 storage tanks
+2025-07-01 21:12:07,457 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 21:12:07,473 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 21:12:07,474 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 21:12:07,477 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 21:12:07,477 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 21:12:07,478 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 21:12:32,515 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:12:32,523 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:12:32,550 - utils.data_loader - INFO - Loaded 9 storage tanks
+2025-07-01 21:12:56,980 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:12:56,986 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:12:57,022 - utils.data_loader - INFO - Loaded 3 equipment items
+2025-07-01 21:13:35,102 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:13:35,107 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:13:35,171 - utils.data_loader - INFO - Loaded 2 CIP circuits
+2025-07-01 21:18:43,185 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:18:43,195 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:18:43,277 - utils.data_loader - INFO - Loaded 2 CIP circuits
+2025-07-01 21:18:57,509 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:18:57,525 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:18:57,611 - utils.data_loader - INFO - Loaded 2 CIP circuits
+2025-07-01 21:19:36,196 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 21:19:36,224 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:19:36,233 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:19:36,235 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 21:19:36,238 - utils.data_loader - INFO - Loaded 9 storage tanks
+2025-07-01 21:19:36,241 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 21:19:36,253 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 21:19:36,255 - utils.data_loader - INFO - Loaded 4 equipment items
+2025-07-01 21:19:36,255 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 21:19:36,257 - utils.data_loader - INFO - Loaded 2 CIP circuits
+2025-07-01 21:19:36,257 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 21:19:36,258 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 21:20:36,844 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:20:36,876 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:21:01,597 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:21:01,613 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 21:21:01,683 - utils.data_loader - INFO - Loaded 4 production lines
+2025-07-01 21:21:01,804 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 21:21:01,806 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 22:03:49,932 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 22:03:49,960 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 22:03:50,019 - utils.data_loader - INFO - Loaded 7 production lines
+2025-07-01 22:03:50,342 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 22:03:50,346 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 22:07:15,241 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 22:07:15,256 - utils.data_loader - INFO - Loaded 19 SKUs
+2025-07-01 22:08:59,724 - utils.data_loader - INFO - Loaded 1 user indents
+2025-07-01 22:09:01,660 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 22:09:01,660 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 22:09:01,661 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 22:09:01,661 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 22:09:01,661 - OptimizerLogger - INFO - Testing with 1 orders...
+2025-07-01 22:09:01,663 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 22:09:01,663 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 22:09:49,139 - utils.data_loader - INFO - Loaded 7 product definitions
+2025-07-01 22:09:49,144 - utils.data_loader - INFO - Loaded 19 SKUs

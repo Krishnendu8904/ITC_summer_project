@@ -138,6 +138,7 @@ class DataLoader:
         logger.info("Sample Data Loaded Successfully")
 
     def load_skus_with_fallback(self) -> Dict[str, SKU]:
+        config.SKUS.clear()
         """Load SKUs with updated structure"""
         df = self._get_csv_or_warn("sku_config.csv")
         if df is None or df.empty:
