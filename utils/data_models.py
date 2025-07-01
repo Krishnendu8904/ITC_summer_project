@@ -1,5 +1,5 @@
 from __future__ import annotations # For forward references in type hints (e.g., 'Product')
-from ortools.sat.python import cp_model
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, time
 from typing import List, Optional, Dict, Any, Union
@@ -725,27 +725,8 @@ class SchedulingResult:
             total_idle_time=0  # Would need more detailed calculation
         )
     
-    @property
-    def is_optimal(self) -> bool:
-        """Check if solution is optimal"""
-        return self.status == cp_model.OPTIMAL
     
-    @property
-    def is_feasible(self) -> bool:
-        """Check if solution is feasible"""
-        return self.status in [cp_model.OPTIMAL, cp_model.FEASIBLE]
-    
-    @property
-    def status_name(self) -> str:
-        """Get human-readable status name"""
-        status_names = {
-            cp_model.OPTIMAL: "OPTIMAL",
-            cp_model.FEASIBLE: "FEASIBLE",
-            cp_model.INFEASIBLE: "INFEASIBLE",
-            cp_model.UNKNOWN: "UNKNOWN",
-            cp_model.MODEL_INVALID: "MODEL_INVALID"
-        }
-        return status_names.get(self.status, "UNKNOWN")
+
     
     def get_resource_schedule(self, resource_id: str) -> List[TaskSchedule]:
         """Get all tasks scheduled for a specific resource"""
