@@ -19,14 +19,16 @@ class Priority(Enum):
     HIGH = 5
 # Consolidated Status for all resources (Line, Tank, Equipment, Room)
 class CapacityType(Enum):
-    BATCH = 1      # Default: For resources that do one task at a time.
     CUMULATIVE = 0
+    BATCH = 1      # Default: For resources that do one task at a time.
+    SHARED_BY_CATEGORY = 2
 
 class ResourceType(StrEnum): # Represents categories of resources
     TANK = "Tank"
     LINE = "Line"
     ROOM = "Room"
     EQUIPMENT = "Equipment"
+    CIP_circuit = "CIP_Circuit"
 
 class ResourceStatus(StrEnum):
     ACTIVE = "Active"
@@ -62,6 +64,11 @@ class ProcessType(StrEnum):
     PREPROCESSING = "Preprocessing"
     PROCESSING = "Processing"
     PACKAGING = "Packaging"
+
+class SchedulingRule(StrEnum):
+    DEFAULT = 'Default'
+    ZERO_STAGNATION = 'Zero Stagnation'
+    FIFO_AGING = 'FIFO Ageing'
 
 
 def _dict_to_str(d: Dict[str, float]) -> str:
@@ -324,6 +331,7 @@ class ProcessingStep:
     cool_down: Optional[int] = 0 # Cool down in minutes
     requirements: List[ResourceRequirement] = field(default_factory= list)
     process_type: ProcessType = ProcessType.PACKAGING
+    scheduling_rule: SchedulingRule = SchedulingRule.DEFAULT
     
     # Flags for step-specific requirements for the scheduler
     requires_CIP_after: bool = False # Does this step require CIP on its resource after completion?
@@ -344,8 +352,7 @@ class ProcessingStep:
             "Compatible_Resource_IDs": " / ".join((','.join(resource_id for resource_id in resource.compatible_ids)) for resource in self.requirements),
             "Requires_CIP_After": self.requires_CIP_after
         }
-    
-
+   
 @dataclass
 class Product:
     """Defines a product category and its sequence of processing steps."""

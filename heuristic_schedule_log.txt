@@ -1,0 +1,531 @@
+-------------------- Log made at 13:54:03.878429 --------------------
+
+================================================================================TASK RELATIONSHIP DEBUG================================================================================
+--- JOB: SELECT-CURD-master0 ---
+Total tasks: 11 
+Anchor tasks: 0
+  SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION:
+    Prerequisites: 0
+    Previous: None
+    Next: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST
+    Status: BOOKED
+    Is Anchor: False
+  SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION
+    Next: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+    Status: BOOKED
+    Is Anchor: False
+  SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION
+    Next: SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+    Status: BOOKED
+    Is Anchor: False
+  SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST
+    Next: ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING
+    Status: BOOKED
+    Is Anchor: False
+  SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST
+    Next: ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING
+    Status: BOOKED
+    Is Anchor: False
+  CIP-PST-1-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-SOURCE-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST-on-MST-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST-on-LT-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  CIP-LT-1-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-SOURCE-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST-on-MST-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST-on-LT-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION ---
+Total tasks: 2 
+Anchor tasks: 1
+  -> ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING (priority: 3)
+  ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+    Next: None
+    Status: BOOKED
+    Is Anchor: True
+  LOCKED-SOURCE-for-ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING-on-LT-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION ---
+Total tasks: 2 
+Anchor tasks: 1
+  -> ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING (priority: 5)
+  ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+    Next: None
+    Status: BOOKED
+    Is Anchor: True
+  LOCKED-SOURCE-for-ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING-on-LT-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION ---
+Total tasks: 2 
+Anchor tasks: 1
+  -> ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING (priority: 3)
+  ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+    Next: None
+    Status: BOOKED
+    Is Anchor: True
+  LOCKED-SOURCE-for-ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING-on-LT-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION ---
+Total tasks: 2 
+Anchor tasks: 1
+  -> ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING (priority: 5)
+  ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING:
+    Prerequisites: 1
+    Previous: SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+    Next: None
+    Status: BOOKED
+    Is Anchor: True
+  LOCKED-SOURCE-for-ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING-on-LT-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: POUCH-CURD-master1 ---
+Total tasks: 9 
+Anchor tasks: 0
+  POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION:
+    Prerequisites: 0
+    Previous: None
+    Next: POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST
+    Status: BOOKED
+    Is Anchor: False
+  POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST:
+    Prerequisites: 1
+    Previous: POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION
+    Next: POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION
+    Status: BOOKED
+    Is Anchor: False
+  POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST:
+    Prerequisites: 1
+    Previous: POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION
+    Next: POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION
+    Status: BOOKED
+    Is Anchor: False
+  POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION:
+    Prerequisites: 1
+    Previous: POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST
+    Next: ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING
+    Status: BOOKED
+    Is Anchor: False
+  POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION:
+    Prerequisites: 1
+    Previous: POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST
+    Next: ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-SOURCE-for-POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST-on-MST-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-for-POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST-on-LT-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-SOURCE-for-POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST-on-MST-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  LOCKED-for-POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST-on-LT-2:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION ---
+Total tasks: 2 
+Anchor tasks: 1
+  -> ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING (priority: 3)
+  ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING:
+    Prerequisites: 1
+    Previous: POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION
+    Next: None
+    Status: BOOKED
+    Is Anchor: True
+  LOCKED-SOURCE-for-ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING-on-LT-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION ---
+Total tasks: 2 
+Anchor tasks: 1
+  -> ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING (priority: 3)
+  ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING:
+    Prerequisites: 1
+    Previous: POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION
+    Next: None
+    Status: BOOKED
+    Is Anchor: True
+  LOCKED-SOURCE-for-ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING-on-LT-2:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+
+--- JOB: CLEANUP ---
+Total tasks: 8 
+Anchor tasks: 0
+  AUTO-CIP-on-LT-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-LT-2:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-LT-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-MST-3:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-BUCKET-LINE-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-CUP-LINE-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-POUCH-LINE-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+  AUTO-CIP-on-PST-1:
+    Prerequisites: 0
+    Previous: None
+    Next: None
+    Status: BOOKED
+    Is Anchor: False
+================================================================================
+                         HEURISTIC SCHEDULER RUN LOG
+================================================================================
+
+--- Decision Log ---
+--- Heuristic Scheduler Run Started (ASAP Model) ---
+Step 1: Generating all tasks...
+--- Task Generation ---
+[INFO] Creating master batch plan using Proportional Draw-Down.
+--- Master Batch Allocation Breakdown ---
+  -> Batch 'SELECT-CURD-master0' | Volume: 10000.0L | Supplies: [('ORD_101', 7500.0), ('ORD_201', 2500.0)]
+  -> Batch 'POUCH-CURD-master1' | Volume: 8000.0L | Supplies: [('ORD_102', 8000.0)]
+------------------------------------
+Appending task: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION to master task list
+Appending task: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST to master task list
+Appending task: SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST to master task list
+Appending task: SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION to master task list
+Appending task: SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION to master task list
+[WARNING] Zero processing speed for task ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING on resource CUP-LINE-1. Check config.
+Appending task: ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING to master task list
+[FINAL-LINK] Linked bus task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION to cab task ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING
+[CAB ALLOTMENT] Cab0, Order_no ORD_101, Volume 3570
+[WARNING] Zero processing speed for task ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING on resource BUCKET-LINE-1. Check config.
+Appending task: ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING to master task list
+[FINAL-LINK] Linked bus task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION to cab task ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING
+[CAB ALLOTMENT] Cab1, Order_no ORD_201, Volume 1430
+[OVERFLOW] Found 360.00L of overflow to re-allocate from SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION.
+  -> Giving 360.00L of overflow to ORD_101.
+[WARNING] Zero processing speed for task ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING on resource CUP-LINE-1. Check config.
+Appending task: ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING to master task list
+[FINAL-LINK] Linked bus task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION to cab task ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING
+[CAB ALLOTMENT] Cab2, Order_no ORD_101, Volume 3930.0
+[WARNING] Zero processing speed for task ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING on resource BUCKET-LINE-1. Check config.
+Appending task: ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING to master task list
+[FINAL-LINK] Linked bus task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION to cab task ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING
+[CAB ALLOTMENT] Cab3, Order_no ORD_201, Volume 1070.0
+Appending task: POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION to master task list
+Appending task: POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST to master task list
+Appending task: POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST to master task list
+Appending task: POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION to master task list
+Appending task: POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION to master task list
+Appending task: ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING to master task list
+[FINAL-LINK] Linked bus task POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION to cab task ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING
+[CAB ALLOTMENT] Cab0, Order_no ORD_102, Volume 5000
+Appending task: ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING to master task list
+[FINAL-LINK] Linked bus task POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION to cab task ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING
+[CAB ALLOTMENT] Cab1, Order_no ORD_102, Volume 3000
+[INFO] Found 6 anchor tasks
+Anchor task ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING has prereq duration: 40.0
+Anchor task ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING has prereq duration: 40.0
+Anchor task ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING has prereq duration: 40.0
+Anchor task ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING has prereq duration: 40.0
+Anchor task ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING has prereq duration: 40.0
+Anchor task ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING has prereq duration: 39.0
+-> 16 tasks generated.
+
+Step 2: Finding ready tasks and scheduling them...
+[SELECT] Selected task POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION (Job: POUCH-CURD-master1, Prio: 3, Step: 0)
+  [  1] Scheduling POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION                   ...
+ OK
+[SELECT] Selected task POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST (Job: POUCH-CURD-master1, Prio: 3, Step: 1)
+  [  2] Scheduling POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST                                  ...
+[FLOW-LOOKAHEAD] Task POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST is looking ahead for resources for POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION
+ OK
+[SELECT] Selected task POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION (Job: POUCH-CURD-master1, Prio: 3, Step: 2)
+  [  3] Scheduling POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION       ...
+[AFFINITY] Task POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION constrained to LT-1 via intersection logic.
+ OK
+[SELECT] Selected task ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING (Job: ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION, Prio: 3, Step: 3)
+  [  4] Scheduling ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING...
+ OK
+[SELECT] Selected task POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST (Job: POUCH-CURD-master1, Prio: 3, Step: 1)
+  [  5] Scheduling POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST                                  ...
+[FLOW-LOOKAHEAD] Task POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST is looking ahead for resources for POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION
+ OK
+[SELECT] Selected task POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION (Job: POUCH-CURD-master1, Prio: 3, Step: 2)
+  [  6] Scheduling POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION       ...
+[AFFINITY] Task POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION constrained to LT-2 via intersection logic.
+ OK
+[SELECT] Selected task ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING (Job: ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION, Prio: 3, Step: 3)
+  [  7] Scheduling ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING...
+ OK
+[SELECT] Selected task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION (Job: SELECT-CURD-master0, Prio: 3, Step: 0)
+  [  8] Scheduling SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION             ...
+ OK
+[SELECT] Selected task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST (Job: SELECT-CURD-master0, Prio: 3, Step: 1)
+  [  9] Scheduling SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST                            ...
+[FLOW-LOOKAHEAD] Task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST is looking ahead for resources for SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+[FLOW-LOOKAHEAD] Task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST is looking ahead for resources for SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+ OK
+[SELECT] Selected task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION (Job: SELECT-CURD-master0, Prio: 3, Step: 2)
+  [ 10] Scheduling SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION ...
+[AFFINITY] Task SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION constrained to LT-3 via intersection logic.
+ OK
+[SELECT] Selected task ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING (Job: ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION, Prio: 5, Step: 3)
+  [ 11] Scheduling ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING...
+[WARNING] Zero processing speed for task ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING on resource BUCKET-LINE-1. Check config.
+ OK
+[SELECT] Selected task ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING (Job: ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION, Prio: 3, Step: 3)
+  [ 12] Scheduling ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING...
+[WARNING] Zero processing speed for task ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING on resource CUP-LINE-1. Check config.
+ OK
+[SELECT] Selected task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST (Job: SELECT-CURD-master0, Prio: 3, Step: 1)
+  [ 13] Scheduling SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST                            ...
+[FLOW-LOOKAHEAD] Task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST is looking ahead for resources for SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+[FLOW-LOOKAHEAD] Task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST is looking ahead for resources for SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+[FLOW-LOOKAHEAD] Task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST is looking ahead for resources for SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+[FLOW-LOOKAHEAD] Task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST is looking ahead for resources for SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+ OK
+[SELECT] Selected task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION (Job: SELECT-CURD-master0, Prio: 3, Step: 2)
+  [ 14] Scheduling SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION ...
+[AFFINITY] Task SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION constrained to LT-1 via intersection logic.
+ OK
+[SELECT] Selected task ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING (Job: ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION, Prio: 5, Step: 3)
+  [ 15] Scheduling ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING...
+[WARNING] Zero processing speed for task ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING on resource BUCKET-LINE-1. Check config.
+ OK
+[SELECT] Selected task ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING (Job: ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION, Prio: 3, Step: 3)
+  [ 16] Scheduling ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING...
+[WARNING] Zero processing speed for task ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING on resource CUP-LINE-1. Check config.
+ OK
+
+-> All tasks scheduled after 16 iterations.
+
+--- Heuristic Scheduling Complete ---
+
+Step 3: Scheduling mandatory cleanup tasks...
+  -> Checking for drained tanks that need CIP...
+  [TANK-CIP] Tank LT-1 was drained at token 85.0, scheduling CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-LT-1 on LT-1 & CIP_SYS_1 @ token 85.0
+  [TANK-CIP] Tank LT-2 was drained at token 59.0, scheduling CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-LT-2 on LT-2 & CIP_SYS_1 @ token 59.0
+  [TANK-CIP] Tank LT-3 was drained at token 67.0, scheduling CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-LT-3 on LT-3 & CIP_SYS_1 @ token 67.0
+  [TANK-CIP] Tank MST-1 was drained at token 63.0, scheduling CIP.
+  [CIP-HELPER-WARN] No compatible CIP circuit for MST-1.
+  [TANK-CIP] Tank MST-3 was drained at token 39.0, scheduling CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-MST-3 on MST-3 & CIP_SYS_2 @ token 43.0
+  -> Checking for other equipment needing final CIP...
+  [FINAL-CIP] Equipment BUCKET-LINE-1 needs a final CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-BUCKET-LINE-1 on BUCKET-LINE-1 & CIP_SYS_1 @ token 91.0
+  [FINAL-CIP] Equipment CUP-LINE-1 needs a final CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-CUP-LINE-1 on CUP-LINE-1 & CIP_SYS_1 @ token 79.0
+  [FINAL-CIP] Equipment POUCH-LINE-1 needs a final CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-POUCH-LINE-1 on POUCH-LINE-1 & CIP_SYS_2 @ token 59.0
+  [FINAL-CIP] Equipment PST-1 needs a final CIP.
+  [CIP-HELPER-BOOKED] Task AUTO-CIP-on-PST-1 on PST-1 & CIP_SYS_2 @ token 65.0
+-> Cleanup CIP scheduling complete.
+All tasks were successfully scheduled.
+Writing full schedule log to heuristic_schedule_log.txt...
+
+
+--- Final Schedule by Resource ---
+Resource        | Start Time       | End Time         | S_Token | E_Token | Dur(T) | Rule            | Task ID
+--------------------------------------------------------------------------------------------------------------------
+--- BUCKET-LINE-1 ---
+                | ...              | ...              |     ... |     ... |     51 | (IDLE)          |
+BUCKET-LINE-1   | 07-03 10:45      | 07-03 14:45      |      51 |    67.0 |   16.0 | ZERO_STAGNATION | ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING
+BUCKET-LINE-1   | 07-03 14:45      | 07-03 19:15      |      67 |    85.0 |   18.0 | ZERO_STAGNATION | ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING
+                | ...              | ...              |     ... |     ... |    6.0 | (IDLE)          |
+BUCKET-LINE-1   | 07-03 20:45      | 07-03 22:15      |    91.0 |    97.0 |    6.0 | CIP             | AUTO-CIP-on-BUCKET-LINE-1
+
+--- CIP_SYS_1 ---
+                | ...              | ...              |     ... |     ... |   53.0 | (IDLE)          |
+CIP_SYS_1       | 07-03 11:15      | 07-03 12:45      |    53.0 |    59.0 |    6.0 | CIP             | CIP-LT-1-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST
+CIP_SYS_1       | 07-03 12:45      | 07-03 14:15      |    59.0 |    65.0 |    6.0 | CIP             | AUTO-CIP-on-LT-2
+                | ...              | ...              |     ... |     ... |    2.0 | (IDLE)          |
+CIP_SYS_1       | 07-03 14:45      | 07-03 16:15      |    67.0 |    73.0 |    6.0 | CIP             | AUTO-CIP-on-LT-3
+                | ...              | ...              |     ... |     ... |    6.0 | (IDLE)          |
+CIP_SYS_1       | 07-03 17:45      | 07-03 19:15      |    79.0 |    85.0 |    6.0 | CIP             | AUTO-CIP-on-CUP-LINE-1
+CIP_SYS_1       | 07-03 19:15      | 07-03 20:45      |    85.0 |    91.0 |    6.0 | CIP             | AUTO-CIP-on-LT-1
+CIP_SYS_1       | 07-03 20:45      | 07-03 22:15      |    91.0 |    97.0 |    6.0 | CIP             | AUTO-CIP-on-BUCKET-LINE-1
+
+--- CIP_SYS_2 ---
+                | ...              | ...              |     ... |     ... |   39.0 | (IDLE)          |
+CIP_SYS_2       | 07-03 07:45      | 07-03 08:45      |    39.0 |    43.0 |    4.0 | CIP             | CIP-PST-1-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST
+CIP_SYS_2       | 07-03 08:45      | 07-03 10:15      |    43.0 |    49.0 |    6.0 | CIP             | AUTO-CIP-on-MST-3
+                | ...              | ...              |     ... |     ... |   10.0 | (IDLE)          |
+CIP_SYS_2       | 07-03 12:45      | 07-03 14:15      |    59.0 |    65.0 |    6.0 | CIP             | AUTO-CIP-on-POUCH-LINE-1
+CIP_SYS_2       | 07-03 14:15      | 07-03 15:15      |    65.0 |    69.0 |    4.0 | CIP             | AUTO-CIP-on-PST-1
+
+--- CUP-LINE-1 ---
+                | ...              | ...              |     ... |     ... |     51 | (IDLE)          |
+CUP-LINE-1      | 07-03 10:45      | 07-03 14:45      |      51 |    67.0 |   16.0 | ZERO_STAGNATION | ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING
+CUP-LINE-1      | 07-03 14:45      | 07-03 17:45      |      67 |    79.0 |   12.0 | ZERO_STAGNATION | ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING
+CUP-LINE-1      | 07-03 17:45      | 07-03 19:15      |    79.0 |    85.0 |    6.0 | CIP             | AUTO-CIP-on-CUP-LINE-1
+
+--- LT-1 ---
+                | ...              | ...              |     ... |     ... |     32 | (IDLE)          |
+LT-1            | 07-03 06:00      | 07-03 07:00      |      32 |    36.0 |    4.0 | LOCKED          | LOCKED-for-POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST-on-LT-1
+LT-1            | 07-03 07:00      | 07-03 08:00      |      36 |      40 |      4 | DEFAULT         | POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION
+LT-1            | 07-03 08:00      | 07-03 11:00      |      40 |    52.0 |   12.0 | LOCKED          | LOCKED-SOURCE-for-ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING-on-LT-1
+                | ...              | ...              |     ... |     ... |    1.0 | (IDLE)          |
+LT-1            | 07-03 11:15      | 07-03 12:45      |    53.0 |    59.0 |    6.0 | CIP             | CIP-LT-1-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST
+LT-1            | 07-03 12:45      | 07-03 13:45      |    59.0 |    63.0 |    4.0 | LOCKED          | LOCKED-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST-on-LT-1
+LT-1            | 07-03 13:45      | 07-03 14:45      |      63 |      67 |      4 | DEFAULT         | SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+LT-1            | 07-03 14:45      | 07-03 17:45      |      67 |    79.0 |   12.0 | LOCKED          | LOCKED-SOURCE-for-ORD_201-cab3-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING-on-LT-1
+LT-1            | 07-03 14:45      | 07-03 19:15      |      67 |    85.0 |   18.0 | LOCKED          | LOCKED-SOURCE-for-ORD_101-cab2-from-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING-on-LT-1
+LT-1            | 07-03 19:15      | 07-03 20:45      |    85.0 |    91.0 |    6.0 | CIP             | AUTO-CIP-on-LT-1
+
+--- LT-2 ---
+                | ...              | ...              |     ... |     ... |   36.0 | (IDLE)          |
+LT-2            | 07-03 07:00      | 07-03 07:45      |    36.0 |    39.0 |    3.0 | LOCKED          | LOCKED-for-POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST-on-LT-2
+LT-2            | 07-03 07:45      | 07-03 08:45      |      39 |      43 |      4 | DEFAULT         | POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION
+                | ...              | ...              |     ... |     ... |    9.0 | (IDLE)          |
+LT-2            | 07-03 11:00      | 07-03 12:45      |    52.0 |    59.0 |    7.0 | LOCKED          | LOCKED-SOURCE-for-ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING-on-LT-2
+LT-2            | 07-03 12:45      | 07-03 14:15      |    59.0 |    65.0 |    6.0 | CIP             | AUTO-CIP-on-LT-2
+
+--- LT-3 ---
+                | ...              | ...              |     ... |     ... |   43.0 | (IDLE)          |
+LT-3            | 07-03 08:45      | 07-03 09:45      |    43.0 |    47.0 |    4.0 | LOCKED          | LOCKED-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST-on-LT-3
+LT-3            | 07-03 09:45      | 07-03 10:45      |      47 |      51 |      4 | DEFAULT         | SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION
+LT-3            | 07-03 10:45      | 07-03 14:45      |      51 |    67.0 |   16.0 | LOCKED          | LOCKED-SOURCE-for-ORD_101-cab0-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-BKT-SEL-b0-SEL-CRD-PACKING-on-LT-3
+LT-3            | 07-03 10:45      | 07-03 14:45      |      51 |    67.0 |   16.0 | LOCKED          | LOCKED-SOURCE-for-ORD_201-cab1-from-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-LT-STANDARDISATION-INNOCULATION-CUP-SEL-b0-SEL-CRD-PACKING-on-LT-3
+LT-3            | 07-03 14:45      | 07-03 16:15      |    67.0 |    73.0 |    6.0 | CIP             | AUTO-CIP-on-LT-3
+
+--- MST-1 ---
+MST-1           | 07-02 22:00      | 07-03 06:00      |       0 |      32 |     32 | DEFAULT         | SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-MST-STANDARDISATION
+                | ...              | ...              |     ... |     ... |   11.0 | (IDLE)          |
+MST-1           | 07-03 08:45      | 07-03 09:45      |    43.0 |    47.0 |    4.0 | LOCKED          | LOCKED-SOURCE-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST-on-MST-1
+                | ...              | ...              |     ... |     ... |   12.0 | (IDLE)          |
+MST-1           | 07-03 12:45      | 07-03 13:45      |    59.0 |    63.0 |    4.0 | LOCKED          | LOCKED-SOURCE-for-SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST-on-MST-1
+
+--- MST-3 ---
+MST-3           | 07-02 22:00      | 07-03 06:00      |       0 |      32 |     32 | DEFAULT         | POUCH-CURD-master1-POUCH-CURD-b0-CRD-MST-STANDARDISATION
+MST-3           | 07-03 06:00      | 07-03 07:00      |      32 |    36.0 |    4.0 | LOCKED          | LOCKED-SOURCE-for-POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST-on-MST-3
+MST-3           | 07-03 07:00      | 07-03 07:45      |    36.0 |    39.0 |    3.0 | LOCKED          | LOCKED-SOURCE-for-POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST-on-MST-3
+                | ...              | ...              |     ... |     ... |    4.0 | (IDLE)          |
+MST-3           | 07-03 08:45      | 07-03 10:15      |    43.0 |    49.0 |    6.0 | CIP             | AUTO-CIP-on-MST-3
+
+--- POUCH-LINE-1 ---
+                | ...              | ...              |     ... |     ... |     40 | (IDLE)          |
+POUCH-LINE-1    | 07-03 08:00      | 07-03 11:00      |      40 |    52.0 |   12.0 | ZERO_STAGNATION | ORD_102-cab0-from-POUCH-CURD-master1-POUCH-CURD-b0-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING
+POUCH-LINE-1    | 07-03 11:00      | 07-03 12:45      |    52.0 |    59.0 |    7.0 | ZERO_STAGNATION | ORD_102-cab1-from-POUCH-CURD-master1-POUCH-CURD-b1-CRD-LT-STANDARDISATION-INNOCULATION-PCH-CRD-b0-CRD-POUCH-PACKING
+POUCH-LINE-1    | 07-03 12:45      | 07-03 14:15      |    59.0 |    65.0 |    6.0 | CIP             | AUTO-CIP-on-POUCH-LINE-1
+
+--- PST-1 ---
+                | ...              | ...              |     ... |     ... |     32 | (IDLE)          |
+PST-1           | 07-03 06:00      | 07-03 07:00      |      32 |    36.0 |    4.0 | ZERO_STAGNATION | POUCH-CURD-master1-POUCH-CURD-b0-CRD-PAST
+PST-1           | 07-03 07:00      | 07-03 07:45      |    36.0 |    39.0 |    3.0 | ZERO_STAGNATION | POUCH-CURD-master1-POUCH-CURD-b1-CRD-PAST
+PST-1           | 07-03 07:45      | 07-03 08:45      |    39.0 |    43.0 |    4.0 | CIP             | CIP-PST-1-for-SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST
+PST-1           | 07-03 08:45      | 07-03 09:45      |    43.0 |    47.0 |    4.0 | ZERO_STAGNATION | SELECT-CURD-master0-SELECT-CURD-b0-SEL-CRD-PAST
+                | ...              | ...              |     ... |     ... |   12.0 | (IDLE)          |
+PST-1           | 07-03 12:45      | 07-03 13:45      |    59.0 |    63.0 |    4.0 | ZERO_STAGNATION | SELECT-CURD-master0-SELECT-CURD-b1-SEL-CRD-PAST
+                | ...              | ...              |     ... |     ... |    2.0 | (IDLE)          |
+PST-1           | 07-03 14:15      | 07-03 15:15      |    65.0 |    69.0 |    4.0 | CIP             | AUTO-CIP-on-PST-1
+

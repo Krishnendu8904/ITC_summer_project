@@ -109,7 +109,6 @@ class TimeManager:
                         windows.append((start_minutes, end_minutes))
         
         return sorted(windows)
-    # Add this method to your TimeManager class
 
     def _create_non_working_intervals(self) -> List[Tuple[int, int]]:
         """
@@ -210,6 +209,7 @@ class AdvancedProductionScheduler:
 
         self._is_scheduled = {}
         self.produced_quantity = {}
+        self.bulk_batch_consumers = defaultdict(list)
         
         # Logging
         self.logger = logger
@@ -264,7 +264,11 @@ class AdvancedProductionScheduler:
                 print(self.time_manager.working_windows)
                 self._adjust_parameters_for_iterations(iter=iter_num)
                 result = self._solve_iteration(time_limit=(time_limit // max_iterations))
-                self.run_task_lifecycle_diagnostics(result)
+                
+                # [NEW] Call the task lifecycle diagnostics after each iteration
+                if result:
+                    self.run_task_lifecycle_diagnostics(result)
+
                 if result and result.is_feasible:
                     score = abs(self._calculate_score(result))
                     self.logger.info(f"Iteration {iter_num + 1} finished with score: {score:.2f}")
@@ -936,11 +940,6 @@ class AdvancedProductionScheduler:
             
             self.model.Add(duration_var == 0).OnlyEnforceIf(is_active.Not())
             
-            # --- START OF LOGIC FIX ---
-            # We now loop through each possible resource assignment and apply a duration
-            # rule specific to that resource.
-            
-            # Get the task's default duration to use as a fallback.
             base_duration = task_data.get('base_duration', 60) # Default to 60 if not specified
             
             # Track if ANY rule has been applied.
@@ -1424,6 +1423,7 @@ class AdvancedProductionScheduler:
         """
         self.logger.info("Adding corrected quantity-flow mass balance constraints...")
 
+        # [FIX] Changed to self.bulk_batch_consumers to be a class attribute
         self.bulk_batch_consumers = defaultdict(list)
         # Use a set to track which unique allocation volumes have already been added.
         # An allocation is defined by its order, SKU, and the bulk batch it's drawn from.
@@ -1577,7 +1577,6 @@ class AdvancedProductionScheduler:
             objective_terms.append(-tardiness_var * int(self.weights["late_minutes_penalty"]))
 
         # e. Makespan penalty
-        makespan_var = self.model.NewIntVar(0, self.schedule_horizon, 'makespan')
         makespan_var = self.model.NewIntVar(0, self.schedule_horizon, 'makespan')
         # FIX: Remove the 'if' condition. The objective will handle it.
         all_end_times = [task['end'] for task in self.task_vars.values()]
@@ -2168,7 +2167,6 @@ class AdvancedProductionScheduler:
         print("### DIAGNOSTICS COMPLETE ###")
         print("#"*80 + "\n")
 
-    # REMINDER: This diagnostic function requires the _get_all_resources() helper to exist in your class.
     def _get_all_resources(self) -> Dict[str, Any]:
         """A helper to get a single dictionary of all configured resources."""
         all_res = {}
@@ -2190,10 +2188,11 @@ class AdvancedProductionScheduler:
 
         # --- Step 1: Get a set of all tasks that actually ran ---
         ran_task_keys = set()
-        for task in result.scheduled_tasks:
-            # Reconstruct the original task_key from the scheduled task info
-            key = (task.order_no, task.sku_id, task.batch_index, task.step_id)
-            ran_task_keys.add(key)
+        if result and result.scheduled_tasks:
+            for task in result.scheduled_tasks:
+                # Reconstruct the original task_key from the scheduled task info
+                key = (task.order_no, task.sku_id, task.batch_index, task.step_id)
+                ran_task_keys.add(key)
 
         # --- Step 2: Analyze all potential jobs (Bulk and Finishing) ---
         all_jobs = list(self.aggregated_demand.keys()) # Bulk jobs
@@ -2229,8 +2228,8 @@ class AdvancedProductionScheduler:
                 
             # Determine the number of potential batches/allocations
             num_batches = len(self.batch_qty.get(job_id, []))
-            if is_bulk_job and num_batches == 0:
-                # This means the batch size calculation failed for the bulk product.
+            if is_bulk_job and num_batches == 0 and self.products.get(job_id):
+                # This can happen if the batch size calculation failed for the bulk product.
                 num_batches = len(self.batch_qty.get(self.products[job_id].product_category, []))
 
             # Check each potential task for this job
@@ -2273,10 +2272,3 @@ class AdvancedProductionScheduler:
         print("\n" + "#"*80)
         print("### TASK LIFECYCLE DIAGNOSTICS COMPLETE ###")
         print("#"*80 + "\n")
-
-# To make the new diagnostic function work, you'll need to make one small change.
-# In `_add_quantity_flow_constraints`, change the first line from:
-# bulk_batch_consumers = defaultdict(list)
-# to:
-# self.bulk_batch_consumers = defaultdict(list)
-# and use self.bulk_batch_consumers throughout that function.

@@ -502,7 +502,7 @@ class DataLoader:
             "BUCKET-LINE-1": Line(line_id= "BUCKET-LINE-1",compatible_skus_max_production= {"BKT-SEL": 15.0, "BKT-LFT": 15.0},setup_time_minutes= 30,CIP_duration_minutes= 90),
             "CUP-LINE-1": Line(line_id= "CUP-LINE-1",compatible_skus_max_production= {"CUP-SEL": 6},setup_time_minutes= 30,CIP_duration_minutes= 90),
             "LASSI-LINE-1": Line(line_id= "LASSI-LINE-1",compatible_skus_max_production= {"ROS-LAS": 22},setup_time_minutes= 30,CIP_duration_minutes= 90),
-            "POUCH-LINE-1": Line(line_id= "POUCH-LINE-1",compatible_skus_max_production= {"POUCH-CURD'": 30},setup_time_minutes= 30,CIP_duration_minutes= 90)
+            "POUCH-LINE-1": Line(line_id= "POUCH-LINE-1",compatible_skus_max_production= {"PCH-CRD": 30},setup_time_minutes= 30,CIP_duration_minutes= 90)
         }
 
     def _create_sample_tanks(self) -> Dict[str, Tank]:
@@ -510,10 +510,11 @@ class DataLoader:
             "LT-1": Tank(tank_id= "LT-1",capacity_liters= 5000,CIP_duration_minutes= 90),
             "LT-2": Tank(tank_id= "LT-2",capacity_liters= 5000,CIP_duration_minutes= 90),
             "LT-3": Tank(tank_id= "LT-3",capacity_liters= 5000,CIP_duration_minutes= 90),
-            "LT-4": Tank(tank_id= "LT-4",capacity_liters= 10000,CIP_duration_minutes= 90),
-            "LT-5": Tank(tank_id= "LT-5",capacity_liters= 10000,CIP_duration_minutes= 90),
+            "LT-4": Tank(tank_id= "LT-4",capacity_liters= 5000,CIP_duration_minutes= 90),
+            "LT-5": Tank(tank_id= "LT-5",capacity_liters= 5000,CIP_duration_minutes= 90),
             "MST-1": Tank(tank_id= "MST-1",capacity_liters= 10000,CIP_duration_minutes= 90),
-            "MST-2": Tank(tank_id= "MST-2",capacity_liters= 10000,CIP_duration_minutes= 90)
+            "MST-2": Tank(tank_id= "MST-2",capacity_liters= 10000,CIP_duration_minutes= 90),
+            "MST-3": Tank(tank_id= "MST-3",capacity_liters= 10000,CIP_duration_minutes= 90)
         }
 
     def _create_sample_shifts(self) -> Dict[str, Shift]:
@@ -544,16 +545,16 @@ class DataLoader:
         return {
             # Test Case 1 & 2: Multiple SKUs for one product (Yogurt) needing batching,
             # plus same SKU with different priorities/due dates.
-            "ORD_101": UserIndent(order_no= "ORD_101",sku_id= "BKT-SEL",qty_required_liters= 7000,priority= Priority.MEDIUM,due_date= start_date + timedelta(days=2)),
-            "ORD_102": UserIndent(order_no= "ORD_102", sku_id= "PCH-CRD", qty_required_liters= 8000, priority= Priority.MEDIUM,due_date= start_date + timedelta(days=2)),
-            "ORD_201": UserIndent(order_no= "ORD_201",sku_id= "CUP-SEL",qty_required_liters= 3000,priority= Priority.HIGH,due_date= start_date + timedelta(days=2))
+            "ORD_101": UserIndent(order_no= "ORD_101",sku_id= "BKT-SEL",qty_required_liters= 7500,priority= Priority.MEDIUM,due_date= start_date + timedelta(days=3)),
+            "ORD_102": UserIndent(order_no= "ORD_102", sku_id= "PCH-CRD", qty_required_liters= 8000, priority= Priority.MEDIUM,due_date= start_date + timedelta(days=3)),
+            "ORD_201": UserIndent(order_no= "ORD_201",sku_id= "CUP-SEL",qty_required_liters= 2500,priority= Priority.HIGH,due_date= start_date + timedelta(days=3))
         }
 
 
     def _create_sample_equipment(self) -> Dict[str, Equipment]:
         return {
             "PST-1": Equipment(equipment_id= "PST-1",processing_speed= 85.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH),
-            "CRD-HTR-1": Equipment(equipment_id= "CRD-HTR-1",processing_speed= 25.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.CUMULATIVE),
+            "CRD-HTR-1": Equipment(equipment_id= "CRD-HTR-1",processing_speed= 25.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.SHARED_BY_CATEGORY),
             "THERMISER": Equipment(equipment_id= "THERMISER",processing_speed= 35.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH)
         }
 
@@ -580,31 +581,26 @@ class DataLoader:
         name="Pasteurisation",
         process_type=ProcessType.PREPROCESSING,
         requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
-        duration_minutes=60
+        duration_minutes=60,
+        scheduling_rule= SchedulingRule.ZERO_STAGNATION
     ),
     ProcessingStep(
-        step_id="SEL-CRD-LT-STANDARDISATION",
+        step_id="SEL-CRD-LT-STANDARDISATION-INNOCULATION",
         name="LT Standardisation",
         process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
-        duration_minutes=30
-    ),
-    ProcessingStep(
-        step_id="SEL-CRD-INOCULATION",
-        name="Inoculation",
-        process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
-        duration_minutes=30
+        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
+        duration_minutes=60
     ),
     ProcessingStep(
         step_id="SEL-CRD-PACKING",
         name="Packing",
         process_type=ProcessType.PACKAGING,
         requirements=[
-            ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"]),
+            #ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"]),
             ResourceRequirement(ResourceType.LINE, ["BUCKET-LINE-1", "CUP-LINE-1"])
         ],
-        duration_minutes=60  # You may adjust based on actual volume
+        duration_minutes=60,  # You may adjust based on actual volume
+        scheduling_rule= SchedulingRule.ZERO_STAGNATION
     )
     ]),
     "LOW-FAT-CURD": Product(product_category="LOW-FAT-CURD", processing_steps=[
@@ -612,7 +608,7 @@ class DataLoader:
         step_id="LF-CRD-MST-STANDARDISATION",
         name="MST Standardisation",
         process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
+        requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1"])],
         duration_minutes=480  # 8 hours
     ),
     ProcessingStep(
@@ -626,14 +622,14 @@ class DataLoader:
         step_id="LF-CRD-LT-STANDARDISATION",
         name="LT Standardisation",
         process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
+        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1"])],
         duration_minutes=30
     ),
     ProcessingStep(
         step_id="LF-CRD-INOCULATION",
         name="Inoculation",
         process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
+        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1"])],
         duration_minutes=30
     ),
     ProcessingStep(
@@ -652,7 +648,7 @@ class DataLoader:
         step_id="CRD-MST-STANDARDISATION",
         name="MST Standardisation",
         process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["MST-2"])],
+        requirements=[ResourceRequirement(ResourceType.TANK, ["MST-3"])],
         duration_minutes=480  # 8 hours
     ),
     ProcessingStep(
@@ -660,31 +656,26 @@ class DataLoader:
         name="Pasteurisation",
         process_type=ProcessType.PREPROCESSING,
         requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
-        duration_minutes=60
+        duration_minutes=60,
+        scheduling_rule= SchedulingRule.ZERO_STAGNATION
     ),
     ProcessingStep(
-        step_id="CRD-LT-STANDARDISATION",
+        step_id="CRD-LT-STANDARDISATION-INNOCULATION",
         name="LT Standardisation",
         process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, [ "LT-3, LT-4"])],
-        duration_minutes=30
-    ),
-    ProcessingStep(
-        step_id="CRD-INOCULATION",
-        name="Inoculation",
-        process_type=ProcessType.PREPROCESSING,
-        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-3, LT-4"])],
-        duration_minutes=30
+        requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
+        duration_minutes=60
     ),
     ProcessingStep(
         step_id="CRD-POUCH-PACKING",
         name="Packing",
         process_type=ProcessType.PACKAGING,
         requirements=[
-            ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"]),
+            #ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"]),
             ResourceRequirement(ResourceType.LINE, ["POUCH-LINE-1"])
         ],
-        duration_minutes=60  # Adjust if different
+        duration_minutes=60,  # Adjust if different
+        scheduling_rule= SchedulingRule.ZERO_STAGNATION
     )
 ])
 ,
@@ -716,10 +707,11 @@ class DataLoader:
         )
     ])
 }
+    
     def _create_sample_CIP_circuits(self) -> Dict[str, CIP_circuit]:
         return {
         "CIP_SYS_1": CIP_circuit(circuit_id= "CIP_SYS_1",connected_resource_ids= ["LT-1", "LT-2", "LT-3","BUCKET-LINE-1", "CUP-LINE-1", "LT-4", "LT-5"]),
-        "CIP_SYS_2": CIP_circuit(circuit_id= "CIP_SYS_2",connected_resource_ids= ["CRD-HTR-1", "PST-1", "LASSI-LINE-1", "THERMISER", "POUCH-LINE-1"]),
+        "CIP_SYS_2": CIP_circuit(circuit_id= "CIP_SYS_2",connected_resource_ids= ["CRD-HTR-1", "PST-1", "LASSI-LINE-1", "THERMISER", "POUCH-LINE-1", "  MST-1", "MST-2", "MST-3"]),
     }
 
     def _create_sample_compatibility(self) -> pd.DataFrame:

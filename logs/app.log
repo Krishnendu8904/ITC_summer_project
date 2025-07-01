@@ -184,3 +184,593 @@
 2025-06-13 17:37:40,823 - utils.data_loader - INFO - Loading Sample Data... clearing all previous data
 2025-06-13 17:37:40,823 - utils.data_loader - INFO - Sample Data Loaded Successfully
 2025-06-13 17:39:29,104 - root - INFO - Application starting, logging configured.
+2025-06-30 16:43:04,607 - root - INFO - Application starting, logging configured.
+2025-06-30 16:43:06,391 - root - INFO - Application starting, logging configured.
+2025-06-30 16:43:08,110 - utils.data_loader - INFO - Loading all production data...
+2025-06-30 16:43:08,113 - utils.data_loader - INFO - Loading all production data...
+2025-06-30 16:43:08,116 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 16:43:08,118 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 16:43:08,118 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 16:43:08,119 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 16:43:08,119 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 16:43:08,119 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 16:43:08,120 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 16:43:08,120 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 16:43:08,120 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 16:43:08,121 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 16:43:08,121 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-06-30 16:43:08,121 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-06-30 16:43:08,129 - utils.data_loader - INFO - Loaded 1 user indents
+2025-06-30 16:43:08,130 - utils.data_loader - INFO - Loaded 1 user indents
+2025-06-30 16:43:08,130 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-06-30 16:43:08,130 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-06-30 16:43:08,130 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-06-30 16:43:08,130 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-06-30 16:43:08,130 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-06-30 16:43:08,130 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-06-30 16:43:08,130 - utils.data_loader - INFO - All data loaded successfully
+2025-06-30 16:43:08,130 - utils.data_loader - INFO - All data loaded successfully
+2025-06-30 16:43:08,131 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-30 16:43:08,131 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-30 16:43:15,514 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 16:43:15,515 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 16:43:15,515 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 16:45:34,567 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 16:45:34,569 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 16:45:34,569 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 16:53:52,387 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 16:53:52,388 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 16:53:52,388 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 16:59:40,709 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 16:59:40,724 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 16:59:45,183 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 16:59:45,187 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 16:59:45,190 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-06-30 17:21:32,901 - root - INFO - Application starting, logging configured.
+2025-06-30 17:21:33,913 - utils.data_loader - INFO - Loading all production data...
+2025-06-30 17:21:33,926 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:21:33,927 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:21:33,927 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:21:33,928 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 17:21:33,928 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 17:21:33,928 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-06-30 17:21:33,958 - utils.data_loader - INFO - Loaded 1 user indents
+2025-06-30 17:21:33,958 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-06-30 17:21:33,959 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-06-30 17:21:33,959 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-06-30 17:21:33,959 - utils.data_loader - INFO - All data loaded successfully
+2025-06-30 17:21:33,962 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-30 17:21:41,644 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:21:41,645 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:21:41,645 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:25:31,767 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:25:31,769 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:25:31,769 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:25:54,056 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:25:54,058 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:25:54,058 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:25:57,500 - utils.data_loader - INFO - Loaded 1 user indents
+2025-06-30 17:25:57,504 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:25:57,505 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:25:57,505 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:26:02,464 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:26:02,465 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:26:02,465 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:26:25,259 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:26:25,261 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:26:25,261 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:26:37,630 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:26:37,633 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:26:37,633 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:28:49,516 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:28:49,517 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:28:49,517 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:28:53,632 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:28:53,633 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:28:53,633 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:28:53,634 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:28:53,634 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:28:53,635 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:28:58,047 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:28:58,049 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:28:58,049 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:28:58,073 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:28:58,344 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:28:58,345 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:28:58,346 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:29:03,744 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:29:03,746 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:29:03,746 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:29:03,775 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 17:29:03,840 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:29:03,841 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:29:03,841 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:30:24,528 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:30:24,529 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:30:24,529 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:30:34,470 - root - INFO - Application starting, logging configured.
+2025-06-30 17:30:35,997 - utils.data_loader - INFO - Loading all production data...
+2025-06-30 17:30:36,005 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:30:36,008 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:30:36,008 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:30:36,010 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 17:30:36,013 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 17:30:36,013 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-06-30 17:30:36,026 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-06-30 17:30:36,027 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-06-30 17:30:36,027 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-06-30 17:30:36,027 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-06-30 17:30:36,027 - utils.data_loader - INFO - All data loaded successfully
+2025-06-30 17:30:36,030 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-30 17:32:16,671 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:32:16,672 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:32:16,672 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:32:21,335 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:32:21,338 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:32:21,338 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:32:26,657 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:32:26,659 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:32:26,659 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:32:29,802 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:32:29,803 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:32:29,803 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:32:31,254 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:32:31,255 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:32:31,256 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:33:02,974 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:33:02,976 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:33:02,976 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:34:32,420 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:34:32,421 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:34:32,421 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:35:10,723 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:35:10,726 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:35:10,727 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:51:48,623 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:51:48,624 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:51:48,624 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:52:16,051 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:52:16,052 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:52:16,052 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:52:42,971 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:52:42,972 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:52:42,972 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:52:59,670 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:52:59,671 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:52:59,671 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:53:11,320 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:53:11,321 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:53:11,321 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:53:19,908 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:53:19,908 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:53:19,908 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:53:29,403 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:53:29,404 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:53:29,404 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:53:38,344 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:53:38,345 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:53:38,345 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:53:49,976 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:53:49,977 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:53:49,977 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:53:57,714 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:53:57,714 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:53:57,714 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:54:23,543 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:54:23,545 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:54:23,546 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:54:51,775 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:54:51,776 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:54:51,776 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:55:09,855 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:55:09,857 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:55:09,857 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:55:26,270 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:55:26,273 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:55:26,273 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:55:36,673 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:55:36,674 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:55:36,675 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:56:18,729 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:56:18,732 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:56:18,732 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:57:22,158 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:57:22,159 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:57:22,159 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:57:33,416 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:57:33,417 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:57:33,417 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 17:58:37,587 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 17:58:37,588 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 17:58:37,588 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:03:17,469 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:03:17,471 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:03:17,471 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:04:14,887 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:04:14,888 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:04:14,888 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:04:18,781 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:04:18,783 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:04:18,783 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:06:36,302 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:06:36,303 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:06:36,303 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:07:01,448 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:07:01,449 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:07:01,449 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:07:41,463 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:07:41,465 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:07:41,465 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:08:45,116 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:08:45,117 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:08:45,117 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:08:54,541 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:08:54,542 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:08:54,542 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:41:30,892 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:41:30,910 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:41:30,912 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:41:41,038 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:41:41,039 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:41:41,039 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:41:47,545 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:41:47,548 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:41:47,548 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:41:54,062 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:41:54,062 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:41:54,062 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:42:01,472 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:42:01,472 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:42:01,472 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:51:09,304 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:51:09,305 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:51:09,305 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:51:24,523 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:51:24,523 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:51:24,523 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:51:47,442 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-06-30 18:51:47,497 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:51:47,498 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:51:47,498 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:51:49,798 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:51:49,799 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:51:49,799 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:52:06,452 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:52:06,453 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:52:06,453 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:52:48,651 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:52:48,653 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:52:48,653 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:52:50,393 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:52:50,394 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:52:50,394 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:53:03,699 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:53:03,700 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:53:03,701 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:53:09,436 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:53:09,436 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:53:09,436 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 18:53:18,690 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 18:53:18,690 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 18:53:18,691 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 21:51:51,576 - root - INFO - Application starting, logging configured.
+2025-06-30 21:51:53,100 - utils.data_loader - INFO - Loading all production data...
+2025-06-30 21:51:53,102 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 21:51:53,103 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 21:51:53,103 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 21:51:53,104 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-06-30 21:51:53,104 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-06-30 21:51:53,104 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-06-30 21:51:53,108 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-06-30 21:51:53,109 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-06-30 21:51:53,109 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-06-30 21:51:53,110 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-06-30 21:51:53,110 - utils.data_loader - INFO - All data loaded successfully
+2025-06-30 21:51:53,110 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-06-30 21:52:03,769 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 21:52:03,770 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 21:52:03,770 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 21:52:12,410 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 21:52:12,411 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 21:52:12,411 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 21:52:16,848 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 21:52:16,849 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 21:52:16,850 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 21:52:19,126 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 21:52:19,127 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 21:52:19,127 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-06-30 21:53:45,278 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-06-30 21:53:45,280 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-06-30 21:53:45,280 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 09:55:26,940 - root - INFO - Application starting, logging configured.
+2025-07-01 09:55:30,123 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 09:55:30,975 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 09:55:31,502 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 09:55:31,503 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 09:55:32,103 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 09:55:32,709 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 09:55:33,302 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 09:55:34,258 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 09:55:35,734 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 09:55:36,664 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 09:55:37,987 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 09:55:37,988 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 09:55:37,991 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 09:55:48,966 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 09:55:48,966 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 09:55:48,967 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 09:55:58,375 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 09:55:58,376 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 09:55:58,377 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 09:56:02,860 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 09:56:02,861 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 09:56:02,861 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 09:56:05,197 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 09:56:05,199 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 09:56:05,199 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 10:12:50,207 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 10:12:50,210 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 10:12:50,210 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 15:30:42,859 - root - INFO - Application starting, logging configured.
+2025-07-01 15:30:44,383 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 15:30:44,387 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 15:30:44,388 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 15:30:44,388 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 15:30:44,388 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 15:30:44,389 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 15:30:44,389 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 15:30:44,394 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:30:44,395 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 15:30:44,395 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 15:30:44,396 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 15:30:44,396 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 15:30:44,396 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 15:30:58,507 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:31:00,761 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:31:00,762 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:31:00,762 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:31:00,762 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:31:00,762 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:31:00,764 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:31:00,764 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:31:08,012 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:31:15,210 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:31:15,211 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:31:15,211 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:31:15,211 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:31:15,212 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:31:15,214 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:31:15,215 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:31:55,104 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:31:55,107 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:31:55,110 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:31:55,110 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:31:55,111 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:31:55,114 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:31:55,115 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:31:59,825 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:32:01,497 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:32:01,498 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:32:01,498 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:32:01,498 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:32:01,498 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:32:01,501 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:32:01,502 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:35:24,929 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:35:26,433 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:35:26,433 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:35:26,433 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:35:26,434 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:35:26,434 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:35:26,434 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:35:26,434 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:35:34,131 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:35:35,712 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:35:35,712 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:35:35,712 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:35:35,713 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:35:35,713 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:35:35,713 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:35:35,714 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:35:41,512 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:35:45,797 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:35:47,597 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:35:47,597 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:35:47,597 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:35:47,597 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:35:47,597 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:35:47,598 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:35:47,598 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:37:18,795 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:37:20,946 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:37:20,946 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:37:20,946 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:37:20,947 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:37:20,947 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:37:20,947 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:37:20,947 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:37:34,224 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:37:37,480 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:37:37,480 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:37:37,480 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:37:37,480 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:37:37,481 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:37:37,481 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:37:37,481 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:40:59,129 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:41:00,545 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:41:00,546 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:41:00,546 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:41:00,547 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:41:00,547 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:41:00,549 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:41:00,549 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:45:08,953 - root - INFO - Application starting, logging configured.
+2025-07-01 15:45:10,497 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 15:45:10,545 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 15:45:10,551 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 15:45:10,551 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 15:45:10,554 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 15:45:10,562 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 15:45:10,564 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 15:45:10,665 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:45:10,670 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 15:45:10,676 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 15:45:10,681 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 15:45:10,681 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 15:45:10,682 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 15:45:15,327 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:45:16,842 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:45:16,843 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:45:16,843 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:45:16,843 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:45:16,843 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:45:16,845 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:45:16,845 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 15:49:55,072 - root - INFO - Application starting, logging configured.
+2025-07-01 15:49:56,607 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 15:49:56,621 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 15:49:56,623 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 15:49:56,623 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 15:49:56,623 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 15:49:56,623 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 15:49:56,624 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 15:49:56,644 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:49:56,644 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 15:49:56,645 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 15:49:56,645 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 15:49:56,645 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 15:49:56,648 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 15:50:02,393 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 15:50:04,639 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 15:50:04,640 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 15:50:04,640 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 15:50:04,640 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 15:50:04,641 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 15:50:04,644 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 15:50:04,644 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 16:39:20,869 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 16:39:24,357 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 16:39:24,357 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 16:39:24,358 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 16:39:24,358 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 16:39:24,359 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 16:39:24,359 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 16:39:24,360 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 16:39:31,884 - root - INFO - Application starting, logging configured.
+2025-07-01 16:39:33,438 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 16:39:33,449 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 16:39:33,452 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 16:39:33,453 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 16:39:33,454 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 16:39:33,454 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 16:39:33,455 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 16:39:33,462 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 16:39:33,462 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 16:39:33,463 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 16:39:33,463 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 16:39:33,463 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 16:39:33,464 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 16:39:39,553 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 16:39:41,238 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 16:39:41,239 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 16:39:41,239 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 16:39:41,239 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 16:39:41,239 - OptimizerLogger - INFO - Testing with 3 orders...
+2025-07-01 16:39:41,241 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 16:39:41,242 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 17:21:46,329 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:21:46,337 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:21:46,337 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:21:58,672 - root - INFO - Application starting, logging configured.
+2025-07-01 17:22:45,375 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 17:22:45,381 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:22:45,381 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:22:45,381 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:22:45,383 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 17:22:45,384 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 17:22:45,384 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 17:22:45,390 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 17:22:45,391 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 17:22:45,392 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 17:22:45,396 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 17:22:45,396 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 17:22:45,398 - root - INFO - Application initialized for user factory.
+2025-07-01 17:22:46,444 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:22:46,444 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:22:46,444 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:22:51,495 - root - INFO - Application starting, logging configured.
+2025-07-01 17:23:15,570 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 17:23:15,574 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:23:15,574 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:23:15,574 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:23:15,575 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 17:23:15,575 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 17:23:15,576 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 17:23:15,581 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 17:23:15,582 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 17:23:15,582 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 17:23:15,583 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 17:23:15,583 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 17:23:15,583 - root - INFO - Application initialized for user dev.
+2025-07-01 17:23:29,885 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:23:29,886 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:23:29,887 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:23:35,393 - root - INFO - Application starting, logging configured.
+2025-07-01 17:23:52,193 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 17:23:52,201 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:23:52,203 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:23:52,203 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:23:52,204 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 17:23:52,205 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 17:23:52,206 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 17:23:52,218 - utils.data_loader - WARNING - File user_indent.csv is empty
+2025-07-01 17:23:52,218 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 17:23:52,219 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 17:23:52,219 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 17:23:52,219 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 17:23:52,219 - root - INFO - Application initialized for user dev.
+2025-07-01 17:23:57,868 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 17:23:57,869 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 17:23:57,869 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 17:24:55,049 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 17:25:01,313 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 17:25:01,314 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 17:25:01,315 - OptimizerLogger - WARNING - Category 'SELECT-CURD' exceeds cap. Total: 15000.0 L. Reducing...
+2025-07-01 17:25:01,315 - OptimizerLogger - INFO -   - Reducing order ORD_201 by 2500.0 L.
+2025-07-01 17:25:01,315 - OptimizerLogger - INFO -   - Reducing order ORD_101 by 2500.0 L.
+2025-07-01 17:25:01,315 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 17:25:01,315 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 17:25:01,316 - OptimizerLogger - INFO - Testing with 4 orders...
+2025-07-01 17:25:01,319 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 17:25:01,320 - OptimizerLogger - INFO - Feasible baseline found!
+2025-07-01 17:27:07,610 - root - INFO - Application initialized.
+2025-07-01 17:27:08,673 - root - INFO - Application starting.
+2025-07-01 17:35:36,447 - root - INFO - Application initialized.
+2025-07-01 17:35:37,597 - root - INFO - Application starting.
+2025-07-01 18:04:27,174 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 18:04:27,175 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 18:12:17,374 - utils.data_loader - INFO - Loading all production data...
+2025-07-01 18:12:17,388 - utils.data_loader - ERROR - Error reading product_config.csv: No columns to parse from file
+2025-07-01 18:12:17,389 - utils.data_loader - ERROR - Error reading sku_config.csv: No columns to parse from file
+2025-07-01 18:12:17,389 - utils.data_loader - WARNING - sku_config.csv not found, returning sample data
+2025-07-01 18:12:17,390 - utils.data_loader - ERROR - Error reading line_config.csv: No columns to parse from file
+2025-07-01 18:12:17,390 - utils.data_loader - ERROR - Error reading tank_config.csv: No columns to parse from file
+2025-07-01 18:12:17,390 - utils.data_loader - ERROR - Error reading shift_config.csv: No columns to parse from file
+2025-07-01 18:12:17,429 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 18:12:17,429 - utils.data_loader - ERROR - Error reading equipment_config.csv: No columns to parse from file
+2025-07-01 18:12:17,429 - utils.data_loader - ERROR - Error reading room_config.csv: No columns to parse from file
+2025-07-01 18:12:17,430 - utils.data_loader - ERROR - Error reading CIP_circuit_config.csv: No columns to parse from file
+2025-07-01 18:12:17,430 - utils.data_loader - INFO - All data loaded successfully
+2025-07-01 18:12:17,431 - root - INFO - Application initialized. All configuration data has been loaded.
+2025-07-01 18:12:20,010 - utils.data_loader - INFO - Loaded 4 user indents
+2025-07-01 18:12:22,329 - OptimizerLogger - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 18:12:22,329 - OptimizerLogger - INFO - Applying product category cap of 10000 L.
+2025-07-01 18:12:22,330 - OptimizerLogger - WARNING - Category 'SELECT-CURD' exceeds cap. Total: 15000.0 L. Reducing...
+2025-07-01 18:12:22,331 - OptimizerLogger - INFO -   - Reducing order ORD_201 by 2500.0 L.
+2025-07-01 18:12:22,331 - OptimizerLogger - INFO -   - Reducing order ORD_101 by 2500.0 L.
+2025-07-01 18:12:22,331 - OptimizerLogger - INFO - --- Iteration 1 ---
+2025-07-01 18:12:22,331 - OptimizerLogger - INFO - --- Running Mock Schedule ---
+2025-07-01 18:12:22,331 - OptimizerLogger - INFO - Testing with 4 orders...
+2025-07-01 18:12:22,335 - OptimizerLogger - INFO -   -> Result: FEASIBLE
+2025-07-01 18:12:22,336 - OptimizerLogger - INFO - Feasible baseline found!

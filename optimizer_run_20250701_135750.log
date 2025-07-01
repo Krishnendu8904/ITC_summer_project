@@ -1,0 +1,15 @@
+2025-07-01 13:57:50,961 - INFO - Running Production Optimizer in standalone mode...
+2025-07-01 13:57:50,962 - INFO - --- Starting Feasibility Baseline Search ---
+2025-07-01 13:57:50,962 - INFO - Applying product category cap of 10000 L.
+2025-07-01 13:57:50,962 - WARNING - Category 'SELECT-CURD' exceeds cap. Total: 15000 L. Reducing...
+2025-07-01 13:57:50,962 - INFO -   - Reducing order ORD_201 by 5000 L.
+2025-07-01 13:57:50,962 - INFO - --- Iteration 1 ---
+2025-07-01 13:57:50,962 - INFO - --- Running Mock Schedule ---
+2025-07-01 13:57:50,962 - INFO - Testing with 3 orders...
+2025-07-01 13:57:50,964 - INFO -   -> Result: FEASIBLE
+2025-07-01 13:57:50,964 - INFO - Feasible baseline found!
+2025-07-01 13:57:50,964 - INFO - ==================================================
+2025-07-01 13:57:50,964 - INFO - OPTIMIZATION COMPLETE
+2025-07-01 13:57:50,964 - INFO - Final Status: Success
+2025-07-01 13:57:50,964 - INFO - ==================================================
+2025-07-01 13:57:50,964 - INFO - Detailed logs have been saved to: optimizer_run_20250701_135750.log

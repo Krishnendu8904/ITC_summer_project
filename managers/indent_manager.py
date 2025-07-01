@@ -7,7 +7,8 @@ from typing import List, Dict, Any, Optional
 import numpy as np
 from pathlib import Path
 from utils.data_models import UserIndent, Priority, SchedulingResult
-from utils.simple_scheduler import AdvancedProductionScheduler
+from utils.new_approach import AdvancedProductionScheduler
+from heuristic_scheduler import HeuristicScheduler
 from utils.data_loader import DataLoader
 import config
 
@@ -676,7 +677,7 @@ def render_user_indent_manager():
                         order_no=order_no,
                         sku_id=str(row["SKU_ID"]),
                         qty_required_liters=float(row["Qty_Required_Liters"]),
-                        priority=int(row["Priority"]),
+                        priority=Priority(int(row["Priority"])),
                         due_date=full_due_datetime
                     )
                 
@@ -690,17 +691,23 @@ def render_user_indent_manager():
                 # Update the user_indents list as well
                 st.session_state.user_indents = list(updated_indents.values())
 
-                with st.spinner(f"Running optimization for {time_limit_seconds} seconds... This may take a while."):
+                with st.spinner(f"Running Scheduler for {time_limit_seconds} seconds... This may take a while."):
                     # Calculate schedule start time (next working day)
                     schedule_start = datetime.now().replace(hour=8, minute=0, second=0, microsecond=0)
                     if schedule_start <= datetime.now():
                         schedule_start += timedelta(days=1)
                     
-                    scheduler = AdvancedProductionScheduler(
-                        schedule_start=schedule_start,
-                        schedule_horizon=4,  # 4 days
+                    scheduler = HeuristicScheduler(
+                        indents=config.USER_INDENTS,
+                        skus=config.SKUS,
+                        products=config.PRODUCTS,
+                        lines=config.LINES,
+                        tanks=config.TANKS,
+                        equipments=config.EQUIPMENTS,
+                        shifts=config.SHIFTS
                     )
-                    result = scheduler.schedule_production(time_limit=time_limit_seconds)
+
+                    result = scheduler.run_heuristic_scheduler()
                     
                     # Save result to session state
                     st.session_state.last_schedule_result = result
