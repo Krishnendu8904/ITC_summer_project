@@ -58,12 +58,11 @@ class ScheduleStatus(StrEnum): # New enum for ScheduleItem status
     UNFULFILLED = "Unfulfilled" # For indents that couldn't be scheduled
 
 class ProcessType(StrEnum):
-    INCUBATION = "Incubation"
-    CHILLING = "Chilling"
     STORING = "Storing"
     PREPROCESSING = "Preprocessing"
     PROCESSING = "Processing"
     PACKAGING = "Packaging"
+    POST_PACKAGING = "Post_Packaging"
 
 class SchedulingRule(StrEnum):
     DEFAULT = 'Default'
@@ -290,15 +289,6 @@ class Room:
 
     def get_available_capacity_units(self) -> float:
         return self.capacity_units - self.current_occupancy_units
-
-    def can_accommodate(self, sku_id: str, quantity: float) -> bool:
-        if self.status != ResourceStatus.ACTIVE:
-            return False
-        if not self.supported_skus: # If empty list, assume supports all
-            return True
-        if sku_id not in self.supported_skus:
-            return False
-        return self.get_available_capacity_units() >= quantity
 
     def is_full(self) -> bool:
         return self.current_occupancy_units >= self.capacity_units
@@ -566,8 +556,10 @@ class TaskSchedule:
     resource_id: str
     volume: int
     priority: Priority
+    process_type: Optional[ProcessType]
     setup_time: int = 0
     CIP_required: bool = False
+    
     
     @property
     def duration_minutes(self) -> int:

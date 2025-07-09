@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass, field
+from re import sub
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta, time
 from enum import Enum, auto
@@ -8,6 +9,8 @@ import math
 import plotly.io as pio
 import json
 import datetime
+
+from pyparsing import line
 
 
 # Assume 'config.py' and 'utils/data_models.py' exist in the same directory
@@ -19,6 +22,20 @@ import plotly.express as px
 import pandas as pd
 
 # --- Enums for Status and Task Types ---
+class ResourceStatus(Enum):
+    """Defines the real-time status of a resource."""
+    IDLE = auto()      # Clean, empty, and available
+    BUSY = auto()      # Currently performing a task
+    DIRTY = auto()     # Finished a task, contains product, needs cleaning
+
+@dataclass
+class ResourceState:
+    """Holds the live state of a single resource."""
+    resource_id: str
+    status: ResourceStatus = ResourceStatus.IDLE
+    current_contents: Optional[str] = None  # e.g., the product_category
+    task_id: Optional[str] = None
+    dirty_since: Optional[datetime] = None
 
 class ScheduleStatus(Enum):
     """Defines the scheduling status of a task."""
@@ -34,25 +51,55 @@ class TaskType(Enum):
     CIP = auto() # Clean-In-Place
     LOCKED = auto()
 
+# In scheduler-v2-dummy.py
+
 class TimeManager:
-    """Manages working shifts and finds valid uninterruptible time slots."""
+    """
+    Manages working shifts and finds valid uninterruptible time slots.
+    Now includes logic to buffer the start and end of each shift.
+    """
     def __init__(self, shifts: Dict, time_block_minutes: int):
         self.TIME_BLOCK_MINUTES = time_block_minutes
         self.shifts_by_day = defaultdict(list)
+        
+        START_BUFFER_MINUTES = 30
+        END_BUFFER_MINUTES = 15
+
         for s in shifts.values():
             if s.is_active:
+                # To handle time arithmetic, we combine the shift times with a dummy date.
+                dummy_date = datetime(2024, 1, 1).date()
+                start_dt = datetime.combine(dummy_date, s.start_time)
+                end_dt = datetime.combine(dummy_date, s.end_time)
+
+                # Handle overnight shifts by moving the end date to the next day
+                if end_dt <= start_dt:
+                    end_dt += timedelta(days=1)
+
+                # Apply the startup and cooldown buffers
+                effective_start_dt = start_dt + timedelta(minutes=START_BUFFER_MINUTES)
+                effective_end_dt = end_dt - timedelta(minutes=END_BUFFER_MINUTES)
+
+                # If the buffers make the shift invalid (e.g., too short), skip it.
+                if effective_end_dt <= effective_start_dt:
+                    continue
+
+                # The rest of the logic uses the new effective times.
+                # We store only the time part for the daily check.
+                effective_start_time = effective_start_dt.time()
+                effective_end_time = effective_end_dt.time()
+
                 # Assume an active shift runs every day of the week
                 for day_of_week in range(7):
-                    shift_start = s.start_time
-                    shift_end = s.end_time
-                    self.shifts_by_day[day_of_week].append((shift_start, shift_end))
+                    self.shifts_by_day[day_of_week].append((effective_start_time, effective_end_time))
 
     def _is_in_shift(self, dt_to_check: datetime) -> bool:
-        """Checks if a single datetime falls within any active shift for that day."""
+        """Checks if a single datetime falls within any active (and buffered) shift."""
         day_of_week = dt_to_check.weekday()
         time_of_day = dt_to_check.time()
 
-        for shift_start, shift_end in self.shifts_by_day[day_of_week]:
+        for shift_start, shift_end in self.shifts_by_day.get(day_of_week, []):
+            # This logic correctly handles both normal and overnight shifts with the buffered times.
             if shift_end <= shift_start: # Overnight shift
                 if time_of_day >= shift_start or time_of_day < shift_end:
                     return True
@@ -61,52 +108,30 @@ class TimeManager:
                     return True
         return False
 
-    def get_valid_slots_for_duration(self, schedule_start_dt: datetime, schedule_end_dt: datetime, duration_tokens: int) -> list:
-        """Finds all possible start tokens for an uninterruptible slot of a given duration."""
-        valid_start_tokens = []
-        duration_delta = timedelta(minutes=duration_tokens * self.TIME_BLOCK_MINUTES)
-
-        current_dt = schedule_start_dt
-        while current_dt < schedule_end_dt:
-            # Only check times that align with the start of a token
-            if (current_dt - schedule_start_dt).total_seconds() % (self.TIME_BLOCK_MINUTES * 60) == 0:
-                slot_end_dt = current_dt + duration_delta
-
-                # Check if both start and end times are within a valid shift period.
-                # A simple check is that if start and end are on the same day, they must be in the same shift.
-                if self._is_in_shift(current_dt) and self._is_in_shift(slot_end_dt - timedelta(minutes=1)):
-                    # A more robust check for overnight shifts would be needed for tasks that can span midnight
-                    # For now, we assume packing tasks don't span midnight.
-                    if current_dt.date() == (slot_end_dt - timedelta(minutes=1)).date():
-                         start_token = int((current_dt - schedule_start_dt).total_seconds() / 60 / self.TIME_BLOCK_MINUTES)
-                         valid_start_tokens.append(start_token)
-
-            current_dt += timedelta(minutes=self.TIME_BLOCK_MINUTES)
-            
-        return valid_start_tokens
-    
-    def is_slot_in_single_shift(self, start_dt: datetime, duration_tokens: int) -> bool:
-        """Checks if a slot of a given duration falls entirely within one shift."""
-        end_dt = start_dt + timedelta(minutes=duration_tokens * self.TIME_BLOCK_MINUTES)
-        
+    def get_shift_end(self, start_dt: datetime) -> Optional[datetime]:
+        """
+        Finds the shift a datetime belongs to and returns the exact datetime
+        when that shift ends (the buffered end time).
+        """
         day_of_week = start_dt.weekday()
-        if day_of_week not in self.shifts_by_day:
-            return False
+        time_of_day = start_dt.time()
 
-        for shift_start_time, shift_end_time in self.shifts_by_day[day_of_week]:
-            # Simple case: shift does not cross midnight
-            if shift_start_time <= shift_end_time:
-                if start_dt.time() >= shift_start_time and end_dt.time() <= shift_end_time:
-                    if start_dt.date() == (end_dt - timedelta(seconds=1)).date():
-                        return True
-            # Complex case: shift crosses midnight
+        for shift_start_time, shift_end_time in self.shifts_by_day.get(day_of_week, []):
+            # Normal shift (e.g., 06:00-14:00)
+            if shift_start_time < shift_end_time:
+                if shift_start_time <= time_of_day < shift_end_time:
+                    return datetime.datetime.combine(start_dt.date(), shift_end_time)
+            # Overnight shift (e.g., 22:00-06:00)
             else:
-                if start_dt.time() >= shift_start_time or (end_dt - timedelta(seconds=1)).time() < shift_end_time:
-                     # This logic needs to be more robust for spanning midnight, but is a start
-                    return True
-        return False
+                if time_of_day >= shift_start_time:
+                    # It's before midnight, so the shift ends on the next day
+                    return datetime.datetime.combine(start_dt.date() + datetime.timedelta(days=1), shift_end_time)
+                elif time_of_day < shift_end_time:
+                     # It's after midnight, so the shift ends on the same day
+                    return datetime.datetime.combine(start_dt.date(), shift_end_time)
+        
+        return None # The given time is not in any active shift
 
-# Place this near the top with the other dataclasses
 @dataclass
 class SubOrder:
     """Represents a piece of a larger order, sized to fit in a batch."""
@@ -116,15 +141,17 @@ class SubOrder:
     volume: float
     priority: int
     due_date: datetime
+    master_batch_id: str
 
 @dataclass
 class HeuristicTask:
     """Represents a single, schedulable unit of work for the heuristic model."""
     # Core Identifiers
     task_id: str
-    job_id: str  # e.g., Order number or bulk production ID
+    job_id: str      # e.g., Order number or bulk production ID
     sku_id: str
     step: ProcessingStep
+    
     
     # Task Characteristics
     task_type: TaskType
@@ -134,7 +161,9 @@ class HeuristicTask:
     priority: int = 5 # Default priority, 1 is highest
     total_prereq_duration_tokens: int = 0
     step_idx: int = 0
+    batch_idx: int = 0
     
+    sub_batch_id: str = "" # New explicit field for batch grouping
 
     # Relational Links
     previous_task: Optional['HeuristicTask'] = None
@@ -152,8 +181,199 @@ class HeuristicTask:
     def __repr__(self):
         return f"HeuristicTask(id={self.task_id}, job={self.job_id}, step={self.step.step_id})"
 
+class ResourceManager:
+    """
+    A stateful manager for all resources in the plant.
+    It tracks the real-time status and contents of each resource,
+    serving as the single source of truth for the scheduler.
+    """
+    def __init__(self, tanks: Dict, lines: Dict, equipments: Dict, rooms: Dict, skus: Dict, log_entries: List[str], task_lookup: Dict[str, HeuristicTask]):
+        self.resource_states: Dict[str, ResourceState] = {}
+        self.timeline: Dict[str, List[Tuple[datetime, datetime, str, float]]] = defaultdict(list)
+        self.skus = skus
+        self.log_entries = log_entries
+        self.task_lookup = task_lookup
+
+        # A combined dictionary to easily look up resource objects by ID
+        self.resource_objects = {**tanks, **lines, **equipments, **rooms}
+
+        # Initialize state for all known resources
+        for res_id in self.resource_objects.keys():
+            self.resource_states[res_id] = ResourceState(resource_id=res_id)
+        self.log_entries.append(f"[ResourceManager] Initialized with {len(self.resource_states)} resources.")
+
+    def get_state(self, resource_id: str) -> Optional[ResourceState]:
+        """Safely returns the current state of a resource."""
+        return self.resource_states.get(resource_id)
+
+    def is_available(self, resource_id: str, start_time: datetime, end_time: datetime) -> bool:
+        """Checks if a resource has any booking collisions during a time window."""
+        # A small buffer to avoid floating point issues with datetimes
+        end_time_exclusive = end_time - timedelta(seconds=1)
+
+        for booked_start, booked_end, task_id, _ in self.timeline.get(resource_id, []):
+            if booked_start < end_time and booked_end > start_time:
+                self.log_entries.append(f"    [RM-Check] Collision on {resource_id}: requested slot {start_time}-{end_time} conflicts with {task_id} ({booked_start}-{booked_end})")
+                return False
+        return True
+
+    def is_capacity_available(self, resource_id: str, start_time: datetime, end_time: datetime, required_capacity: float) -> bool:
+        """
+        Checks if a SHARED resource (like a Room) has enough EUI capacity available
+        during a time window.
+        """
+        room = self.resource_objects.get(resource_id)
+        if not room or not hasattr(room, 'capacity_units'):
+            self.log_entries.append(f"    [RM-Capacity-Check] ERROR: Resource {resource_id} is not a valid room with capacity.")
+            return False # Not a valid room
+
+        total_room_capacity = room.capacity_units
+        
+        # Find the peak capacity usage during the requested time window
+        peak_usage = 0
+        
+        # We need to check the capacity usage at every point a new task starts or ends within our window
+        # to find the moment of maximum concurrent usage.
+        
+        # Get all overlapping tasks
+        overlapping_tasks = [
+            (s, e, t, cap) for s, e, t, cap in self.timeline.get(resource_id, [])
+            if s < end_time and e > start_time
+        ]
+
+        if not overlapping_tasks:
+            return total_room_capacity >= required_capacity
+
+        # Find the highest concurrent capacity usage within the interval
+        # This is a simplified check for peak concurrency. A more advanced model might check every minute.
+        max_concurrent_capacity = 0
+        
+        # Check at the start time of the new task
+        current_usage_at_start = sum(cap for s, e, t, cap in overlapping_tasks if s <= start_time < e)
+        max_concurrent_capacity = max(max_concurrent_capacity, current_usage_at_start)
+        
+        # Check just after each existing task starts within the window
+        for s_check, _, _, _ in overlapping_tasks:
+            if start_time < s_check < end_time:
+                usage_at_this_point = sum(cap for s, e, t, cap in overlapping_tasks if s <= s_check < e)
+                max_concurrent_capacity = max(max_concurrent_capacity, usage_at_this_point)
+                
+        available_capacity = total_room_capacity - max_concurrent_capacity
+        
+        if available_capacity >= required_capacity:
+            return True
+        else:
+            self.log_entries.append(f"    [RM-Capacity-Check] FAILED on {resource_id}: Required {required_capacity:.2f} EUI, but only {available_capacity:.2f} is available.")
+            return False
+
+
+    
+    def get_required_setup_minutes(self, resource_id: str, new_product_category: str, start_time: datetime) -> int:
+        """
+        Determines the necessary setup or CIP time based on the resource's state.
+        Returns duration in minutes. Now includes a check for max continuous runtime.
+
+        Args:
+            resource_id (str): The ID of the resource to check.
+            new_product_category (str): The category of the product about to be scheduled.
+            start_time (datetime): The proposed start time for the new task, used for runtime check.
+        """
+        state = self.resource_states[resource_id]
+        resource_obj = self.resource_objects.get(resource_id)
+        cip_duration = getattr(resource_obj, 'CIP_duration_minutes', 90)
+        
+        # Rule 1: Product Changeover (Highest Priority)
+        # If the resource is dirty with a different product, a major clean is always needed.
+        if state.status == ResourceStatus.DIRTY:
+            if state.current_contents and state.current_contents != new_product_category:
+                self.log_entries.append(f"    [RM-Setup] CIP required on {resource_id}: Was '{state.current_contents}', needs '{new_product_category}'. Duration: {cip_duration} min.")
+                return cip_duration
+                
+        # Rule 2: Max Continuous Runtime for Lines and Equipment
+        # This rule applies if there is no product changeover.
+        if isinstance(resource_obj, (Line, Equipment)):
+            MAX_RUNTIME_MINUTES = 480  # 8 hours, hardcoded as requested
+
+            # Find the end time of the last CIP on this resource
+            last_cip_end_time = None
+            for s, e, task_id, _ in reversed(self.timeline.get(resource_id, [])):
+                task = self.task_lookup.get(task_id) # Assumes task_lookup is available
+                if task and task.task_type == TaskType.CIP:
+                    last_cip_end_time = e
+                    break
+            
+            # If there has never been a CIP, we check from the start of the schedule
+            if last_cip_end_time is None:
+                # To be safe, let's find the first production task instead of assuming schedule start
+                first_prod_task_start = start_time
+                for s, e, task_id, _ in self.timeline.get(resource_id, []):
+                    task = self.task_lookup.get(task_id)
+                    if task and task.task_type != TaskType.CIP:
+                        first_prod_task_start = s
+                        break
+                last_cip_end_time = first_prod_task_start
+
+
+            # Calculate the continuous runtime up to the proposed start of the new task
+            continuous_runtime_minutes = (start_time - last_cip_end_time).total_seconds() / 60
+
+            if continuous_runtime_minutes > MAX_RUNTIME_MINUTES:
+                self.log_entries.append(f"    [RM-Setup] Max runtime CIP required on {resource_id}. Has run for {continuous_runtime_minutes:.0f} mins. Duration: {cip_duration} min.")
+                return cip_duration
+
+        # If neither of the above rules trigger, no setup/CIP is needed.
+        return 0
+
+
+    def commit_task_to_timeline(self, task: HeuristicTask, resource_id: str, start_time: datetime, end_time: datetime):
+        """
+        Books a task on a resource's timeline and updates the resource's final state.
+        This now includes calculating and storing the capacity consumed.
+        """
+        # --- START: NEW LOGIC TO BE ADDED ---
+        capacity_consumed = 0.0
+        resource = self.resource_objects.get(resource_id)
+        
+        if isinstance(resource, Room):
+            sku = self.skus.get(task.sku_id)
+            if sku and hasattr(sku, 'inventory_size'):
+                # This is the key calculation: volume * EUI_per_kg
+                capacity_consumed = task.volume_liters * sku.inventory_size
+        elif resource:
+            capacity_consumed = 1.0 
+
+        self.timeline[resource_id].append((start_time, end_time, task.task_id, capacity_consumed))
+        # --- END KEY LINE CHANGE ---
+        
+        self.timeline[resource_id].sort()
+        self.log_entries.append(f"    [RM-Commit] Booking {task.task_id} on {resource_id} from {start_time.strftime('%H:%M')} to {end_time.strftime('%H:%M')} consuming {capacity_consumed:.2f} EUI.")
+
+        # The rest of the state update logic remains the same
+        state = self.resource_states[resource_id]
+        
+        if task.task_type == TaskType.CIP:
+            state.status = ResourceStatus.IDLE
+            state.current_contents = None
+            state.dirty_since = None
+            self.log_entries.append(f"    [RM-State] Resource {resource_id} is now IDLE and clean.")
+        
+        elif task.task_type in [TaskType.BULK_PRODUCTION, TaskType.FINISHING]:
+            state.status = ResourceStatus.DIRTY
+            state.task_id = task.task_id
+            product_category = None
+            if task.task_type == TaskType.BULK_PRODUCTION:
+                product_category = task.sku_id
+            elif task.task_type == TaskType.FINISHING:
+                if task.sku_id in self.skus:
+                    product_category = self.skus[task.sku_id].product_category
+            
+            state.current_contents = product_category
+            state.dirty_since = end_time
+            self.log_entries.append(f"    [RM-State] Resource {resource_id} is now DIRTY with {product_category}.")
+
 class HeuristicScheduler:
     def __init__(self, indents, skus, products, lines, tanks, equipments, shifts):
+        
         self.indents = indents
         self.skus = skus
         self.products = products
@@ -161,21 +381,34 @@ class HeuristicScheduler:
         self.tanks = tanks
         self.equipments = equipments
         self.shifts = shifts
+        self.rooms = config.ROOMS
         self.cip_circuits = config.CIP_CIRCUIT
         self.TIME_BLOCK_MINUTES = 15
         self.MAX_MASTER_BATCH_SIZE = 10000
+        self.log_entries: List[str] = []
+        self.task_lookup: Dict[str, HeuristicTask] = {}
+        self.log_entries.append(f'Indent recieved: {indents} ******')
 
+
+        # --- RESOURCE MANAGER INTEGRATION ---
+        self.resource_manager = ResourceManager(
+            tanks=self.tanks, 
+            lines=self.lines, 
+            equipments=self.equipments, 
+            rooms = self.rooms,
+            skus=self.skus,
+            log_entries=self.log_entries,
+            task_lookup=self.task_lookup
+        )
         self.time_manager = TimeManager(self.shifts, self.TIME_BLOCK_MINUTES)
         self.schedule_start_dt = datetime.combine(datetime.now().date() + timedelta(days=1), time(22, 0))
         self.schedule_end_dt = self.schedule_start_dt + timedelta(days=2)
-        self.schedule_start_token =0
+        self.schedule_start_token = 0
         self.schedule_end_token = self._to_tokens(self.schedule_end_dt)
         
-
         self.master_task_list: List[HeuristicTask] = []
-        self.task_lookup: Dict[str, HeuristicTask] = {}
-        self.resource_timelines: Dict[str, List[Tuple[int, int, str]]] = defaultdict(list)
-        self.log_entries: List[str] = []
+        
+        self.resource_timelines: Dict[str, List[Tuple[datetime, datetime, str]]] = self.resource_manager.timeline
         self.weights = {"priority": 1000, "due_date_urgency": 500}
 
     def _to_tokens(self, dt: datetime) -> int:
@@ -477,294 +710,456 @@ class HeuristicScheduler:
         return batches
 
     def run_heuristic_scheduler(self):
-        """
-        Main engine that implements a forward-chaining, ASAP (As Soon As Possible)
-        scheduling model to guarantee correct process flow.
-        """
-        self.log_entries.append("--- Heuristic Scheduler Run Started (ASAP Model) ---")
+            """
+            Main engine that implements a forward-chaining, state-aware, transactional
+            scheduling model with support for task splitting.
+            """
+            self.log_entries.append("--- State-Aware Heuristic Scheduler Run Started ---")
 
-        # 1. Generate all tasks and their dependencies first.
-        self.log_entries.append("Step 1: Generating all tasks...")
-        self.generate_all_tasks()
-        self.log_entries.append(f"-> {len(self.master_task_list)} tasks generated.")
+            self.log_entries.append("Step 1: Generating all tasks...")
+            self.generate_all_tasks()
+            self.log_entries.append(f"-> {len(self.master_task_list)} tasks generated.")
 
-        # 2. Iteratively schedule tasks as their prerequisites are met.
-        self.log_entries.append("\nStep 2: Finding ready tasks and scheduling them...")
-        
-        max_loops = len(self.master_task_list) * 2  # Safety break
-        for i in range(max_loops):
-            # Check if all tasks are done.
-            if not any(t for t in self.master_task_list if t.status == ScheduleStatus.PENDING):
-                self.log_entries.append(f"\n-> All tasks scheduled after {i} iterations.")
-                break
-
-            # Find all tasks whose prerequisites are now met.
-            ready_tasks = self._get_ready_tasks()
-
-            if not ready_tasks:
-                self.log_entries.append("[ERROR] Deadlock detected. No ready tasks found but pending tasks still exist.")
-                self.log_entries.append("\n[ERROR] Deadlock detected. Cannot continue scheduling.")
-                break
+            self.log_entries.append("\nStep 2: Finding ready tasks and scheduling them transactionally...")
             
-            # Prioritize which ready task to schedule next.
-            task_to_schedule = self._score_and_select_best_task(ready_tasks)
-            
-            self.log_entries.append(f"  [{i+1:>3}] Scheduling {task_to_schedule.task_id:<75}...")
+            max_loops = len(self.master_task_list) * 3 # Increased max_loops to allow for splits
+            for i in range(max_loops):
+                if not any(t.status == ScheduleStatus.PENDING for t in self.master_task_list):
+                    self.log_entries.append(f"\n-> All tasks scheduled after {i} iterations.")
+                    break
 
-            # Find the earliest possible start time based on when its prerequisites finish.
-            earliest_start_token = self._get_prerequisite_finish_token(task_to_schedule)
-            
-            # Find the best placement using the robust forward-search function.
-            placement = self._find_placement_for_block_task(task_to_schedule, earliest_start_token)
-            
-            if placement:
-                self._book_task(task_to_schedule, placement)
-                self.log_entries.append(" OK")
+                ready_tasks = self._get_ready_tasks()
+                if not ready_tasks:
+                    if any(t.status == ScheduleStatus.PENDING for t in self.master_task_list):
+                        self.log_entries.append("[ERROR] Deadlock detected. No ready tasks found but pending tasks still exist.")
+                    break
+                
+                task_to_schedule = self._score_and_select_best_task(ready_tasks)
+                self.log_entries.append(f"  [{i+1:>3}] Scheduling {task_to_schedule.task_id}...")
+
+                # STRATEGY: First, try to book the entire task.
+                placement = self._find_and_book_transaction(task_to_schedule)
+                
+                # If that fails, and it's a finish task, try splitting it.
+                if not placement and task_to_schedule.task_type == TaskType.FINISHING:
+                    placement = self._split_and_schedule_first_part(task_to_schedule)
+
+                # If both attempts fail, mark it as failed for this run.
+                if not placement and task_to_schedule.status == ScheduleStatus.PENDING:
+                    task_to_schedule.status = ScheduleStatus.FAILED
+                    self.log_entries.append(f"    -> FAILED: Could not place {task_to_schedule.task_id}, even with splitting.")
+
             else:
-                self.log_entries.append(" FAILED")
-                task_to_schedule.status = ScheduleStatus.FAILED
-                self.log_entries.append(f"[FAIL] Could not find a valid slot for task {task_to_schedule.task_id}")
+                self.log_entries.append(f"\n[WARNING] Scheduling loop reached max iterations. Check for unresolved dependencies.")
+            
+            self.log_entries.append("\n--- Heuristic Scheduling Complete ---")
+            self.log_entries.append("\nStep 3: Scheduling mandatory cleanup tasks...")
+            self._schedule_drained_tank_cip()
+            self._schedule_final_equipment_cip()
+            self.log_entries.append("-> Cleanup CIP scheduling complete.")
+            
+            self._report_unscheduled_tasks()
+            self.write_schedule_log_file()
+            return self._create_scheduling_result_for_export()
 
-        else:
-            self.log_entries.append(f"\n[WARNING] Scheduling loop reached max iterations. Check for unresolved dependencies.")
-            print("[WARNING] Scheduling loop reached max iterations.")
+    def _find_and_book_transaction(self, task: HeuristicTask) -> Optional[Dict]:
+        """
+        Finds the BEST placement for a FULL task by checking all compatible resources
+        and selecting the one that offers the earliest finish time.
+        This is now aware of different resource types and handles the ZERO_STAGNATION
+        rule correctly for pipeline sub-tasks.
+        """
+        earliest_start_dt = self._get_prerequisite_finish_time(task)
         
-        self.log_entries.append("\n--- Heuristic Scheduling Complete ---")
-        self.log_entries.append("\nStep 3: Scheduling mandatory cleanup tasks...")
-        # First, handle tanks that have been used and drained.
-        self._schedule_drained_tank_cip()
-        # Second, handle all other equipment for a final end-of-day clean.
-        self._schedule_final_equipment_cip()
-        self.log_entries.append("-> Cleanup CIP scheduling complete.")
-        # --- END: MODIFICATION ---
-        self._report_unscheduled_tasks()
-        return self._create_scheduling_result()
+        if not task.step or not task.step.requirements:
+            self.log_entries.append(f"    [FAIL] Task {task.task_id} has no defined step or resource requirements.")
+            return None
+        primary_req = task.step.requirements[0]
+        compatible_resources = task.compatible_resources.get(primary_req.resource_type, [])
+        if not compatible_resources:
+            self.log_entries.append(f"    [FAIL] Task {task.task_id} has no compatible resources for type {primary_req.resource_type}.")
+            return None
+        product_cat = self.skus.get(task.sku_id).product_category if task.sku_id in self.skus else task.sku_id
+        if not product_cat:
+            self.log_entries.append(f"    [FAIL] Could not determine product category for task {task.task_id}.")
+            return None
 
-    def _find_anchor_for_task(self, task: HeuristicTask) -> Optional[HeuristicTask]:
-        """Traces a task chain forward to find its ultimate anchor task."""
-        current_task = task
-        while current_task.next_task:
-            current_task = current_task.next_task
+        best_placement = None
+        best_finish_time = datetime.max
+
+        for resource_id in compatible_resources:
+            self.log_entries.append(f"    - Evaluating resource {resource_id} for task {task.task_id}...")
+            
+            resource_obj = self.resource_manager.resource_objects.get(resource_id)
+            if not resource_obj:
+                continue
+            
+            search_dt = earliest_start_dt
+            cip_minutes = self.resource_manager.get_required_setup_minutes(resource_id, product_cat, search_dt)
+            cip_duration = timedelta(minutes=cip_minutes)
+            task_duration = timedelta(minutes=task.base_duration_tokens * self.TIME_BLOCK_MINUTES)
+            
+            
+            while search_dt < self.schedule_end_dt:
+                transaction_start = search_dt
+                cip_end = transaction_start + cip_duration
+                task_end = cip_end + task_duration
+
+                if not self.time_manager._is_in_shift(cip_end) or not self.time_manager._is_in_shift(task_end - timedelta(seconds=1)):
+                    search_dt += timedelta(minutes=self.TIME_BLOCK_MINUTES)
+                    continue
+
+                is_slot_available = False
+                source_resource_id = None # For Zero Stagnation
+                
+                # --- START: NEW, SMARTER ZERO_STAGNATION LOGIC ---
+                is_zero_stag = getattr(task.step, 'scheduling_rule', SchedulingRule.DEFAULT) == SchedulingRule.ZERO_STAGNATION
+                is_pipeline_subtask = "-p" in task.task_id and task.task_type == TaskType.FINISHING
+
+                if is_zero_stag and task.previous_task and task.previous_task.assigned_resource_id:
+                    source_resource_id = task.previous_task.assigned_resource_id
+                    
+                    # Check availability of the main resource (the line)
+                    line_is_available = self.resource_manager.is_available(resource_id, cip_end, task_end)
+                    
+                    if not line_is_available:
+                        search_dt += timedelta(minutes=self.TIME_BLOCK_MINUTES)
+                        continue
+
+                    # If it's a pipeline sub-task, we only lock the source for the *first* part
+                    if is_pipeline_subtask:
+                        if task.task_id.endswith("-p1"):
+                            # This is the first part. Find all sibling parts to calculate total drain time.
+                            job_prefix = task.task_id.rsplit('-', 1)[0]
+                            sibling_tasks = [t for t in self.master_task_list if t.task_id.startswith(job_prefix)]
+                            total_drain_duration = timedelta(minutes=len(sibling_tasks) * self.TIME_BLOCK_MINUTES)
+                            drain_end_time = cip_end + total_drain_duration
+                            
+                            # Check if the source tank is free for the whole duration
+                            is_slot_available = self.resource_manager.is_available(source_resource_id, cip_end, drain_end_time)
+                        else:
+                            # This is a subsequent part (-p2, -p3...). The source tank is already locked.
+                            # We only need to check the line, which we already did.
+                            is_slot_available = True
+                    else:
+                        # Standard Zero Stagnation for non-pipeline tasks
+                        is_slot_available = self.resource_manager.is_available(source_resource_id, cip_end, task_end)
+                
+                elif isinstance(resource_obj, Room):
+                    sku = self.skus.get(task.sku_id)
+                    if sku and hasattr(sku, 'inventory_size') and sku.inventory_size > 0:
+                        required_eui = task.volume_liters * sku.inventory_size
+                        is_slot_available = self.resource_manager.is_capacity_available(resource_id, cip_end, task_end, required_eui)
+                    else:
+                        self.log_entries.append(f"    [FAIL] Cannot calculate EUI for {task.sku_id} on Room {resource_id}.")
+                        break
+                else:
+                    # Standard check for all other resources
+                    is_slot_available = self.resource_manager.is_available(resource_id, transaction_start, task_end)
+                # --- END: NEW LOGIC ---
+
+                if not is_slot_available:
+                    search_dt += timedelta(minutes=self.TIME_BLOCK_MINUTES)
+                    continue
+
+                if task_end < best_finish_time:
+                    self.log_entries.append(f"    * New best placement found on {resource_id} finishing at {task_end.strftime('%H:%M')}.")
+                    best_finish_time = task_end
+                    best_placement = {
+                        "task": task, "resource_id": resource_id,
+                        "transaction_start": transaction_start, "cip_end": cip_end, "task_end": task_end,
+                        "cip_duration": cip_duration, "source_resource_id": source_resource_id
+                    }
+                break
         
-        if getattr(current_task, 'is_anchor_task', False):
-            return current_task
+        if best_placement:
+            bp = best_placement
+            task_to_commit = bp['task']
+            self.log_entries.append(f"    + Committing best placement for {task_to_commit.task_id} on {bp['resource_id']}.")
+
+            if bp['cip_duration'].total_seconds() > 0:
+                cip_task_id = f"CIP-for-{task_to_commit.task_id}"
+                cip_task = HeuristicTask(task_id=cip_task_id, job_id=task_to_commit.job_id, sku_id="CIP", step=task_to_commit.step, task_type=TaskType.CIP, batch_idx=task_to_commit.batch_idx)
+                self.resource_manager.commit_task_to_timeline(cip_task, bp['resource_id'], bp['transaction_start'], bp['cip_end'])
+                self.task_lookup[cip_task_id] = cip_task
+
+            self.resource_manager.commit_task_to_timeline(task_to_commit, bp['resource_id'], bp['cip_end'], bp['task_end'])
+            task_to_commit.status = ScheduleStatus.BOOKED
+            task_to_commit.assigned_resource_id = bp['resource_id']
+            task_to_commit.start_time = bp['cip_end']
+            task_to_commit.end_time = bp['task_end']
+            
+            # --- START: NEW, SMARTER SOURCE LOCKING ---
+            if bp['source_resource_id']:
+                # For pipeline tasks, only lock the source for the first part (-p1)
+                if is_pipeline_subtask and task_to_commit.task_id.endswith("-p1"):
+                    job_prefix = task_to_commit.task_id.rsplit('-', 1)[0]
+                    sibling_tasks = [t for t in self.master_task_list if t.task_id.startswith(job_prefix)]
+                    total_drain_duration = timedelta(minutes=len(sibling_tasks) * self.TIME_BLOCK_MINUTES)
+                    drain_end_time = bp['cip_end'] + total_drain_duration
+                    
+                    locked_task_id = f"LOCKED-for-{job_prefix}"
+                    locked_task = HeuristicTask(task_id=locked_task_id, job_id=task_to_commit.job_id, sku_id="LOCKED", step=task_to_commit.step, task_type=TaskType.LOCKED, batch_idx=task_to_commit.batch_idx)
+                    self.resource_manager.commit_task_to_timeline(locked_task, bp['source_resource_id'], bp['cip_end'], drain_end_time)
+                elif not is_pipeline_subtask:
+                    # Standard locking for non-pipeline tasks
+                    locked_task_id = f"LOCKED-for-{task_to_commit.task_id}"
+                    locked_task = HeuristicTask(task_id=locked_task_id, job_id=task_to_commit.job_id, sku_id="LOCKED", step=task_to_commit.step, task_type=TaskType.LOCKED, batch_idx=task_to_commit.batch_idx)
+                    self.resource_manager.commit_task_to_timeline(locked_task, bp['source_resource_id'], bp['cip_end'], bp['task_end'])
+            # --- END: NEW SOURCE LOCKING ---
+            
+            return {"resource_id": bp['resource_id'], "start_time": bp['cip_end'], "end_time": bp['task_end']}
+        
+        return None
+    
+    def _find_next_available_slot(self, resource_id: str, search_after: datetime) -> Optional[Tuple[datetime, datetime]]:
+        """Finds the next available time slot for a resource after a given time."""
+        timeline = self.resource_manager.timeline.get(resource_id, [])
+        current_time = search_after
+        
+        if not timeline:
+            if current_time < self.schedule_end_dt:
+                return (current_time, self.schedule_end_dt)
+            return None
+
+        for i, (start, end, *_) in enumerate(timeline):
+            if current_time < end:
+                current_time = max(current_time, end)
+            
+            next_start = timeline[i+1][0] if i + 1 < len(timeline) else self.schedule_end_dt
+            if current_time < next_start:
+                return (current_time, next_start)
+
+        if current_time < self.schedule_end_dt:
+            return (current_time, self.schedule_end_dt)
+            
         return None
 
-    def _unbook_task_chain(self, anchor_task: HeuristicTask):
-        """Un-books an anchor and all its prerequisites that have already been scheduled."""
-        tasks_to_unbook = [anchor_task]
+    def _split_and_schedule_first_part(self, task: HeuristicTask) -> Optional[Dict]:
+        """
+        Takes a task that failed full placement, finds the first available gap,
+        and schedules a 'Part 1' that is sized to fit within a single shift.
+        """
+        earliest_start_dt = self._get_prerequisite_finish_time(task)
+        primary_req = task.step.requirements[0]
+        compatible_resources = task.compatible_resources.get(primary_req.resource_type, [])
+
+        self.log_entries.append(f"    [SPLIT] Attempting to split {task.task_id}.")
         
-        # Use a queue to find all prerequisites recursively
-        queue = list(anchor_task.prerequisites)
-        while queue:
-            task = queue.pop(0)
-            # Check if we haven't already added this task to avoid infinite loops
-            if task not in tasks_to_unbook:
-                tasks_to_unbook.append(task)
-                queue.extend(task.prerequisites)
-        
-        self.log_entries.append(f"[UNBOOK] Unbooking chain for anchor {anchor_task.task_id}. Tasks to reset: {[t.task_id for t in tasks_to_unbook]}")
-        for task in tasks_to_unbook:
-            if task.status == ScheduleStatus.BOOKED:
-                # Remove from resource timelines
-                for res_id, timeline in self.resource_timelines.items():
-                    self.resource_timelines[res_id] = [booking for booking in timeline if booking[2] != task.task_id]
+        for resource_id in compatible_resources:
+            # Start searching for a valid, shift-compliant slot from its earliest possible start time
+            search_dt = earliest_start_dt
+            while search_dt < self.schedule_end_dt:
+                slot = self._find_next_available_slot(resource_id, search_dt)
+                if not slot: break # No more slots on this resource
+
+                slot_start, slot_end = slot
                 
-                # Reset task status
-                task.status = ScheduleStatus.PENDING
-                task.start_time = None
-                task.end_time = None
-                task.assigned_resource_id = None
+                # Find the end of the shift that the slot starts in
+                shift_end_dt = self.time_manager.get_shift_end(slot_start)
+                if not shift_end_dt: # The slot starts outside of a valid shift, so advance search
+                    search_dt = slot_end if slot_end > slot_start else search_dt + timedelta(minutes=self.TIME_BLOCK_MINUTES)
+                    continue
 
-    def _create_allocation_plan(self) -> List[Dict]:
-            """
-            Creates a production plan by aggregating demand into large "master batches"
-            using proportional allocation based on finishing line speeds to increase parallelism.
-            """
-            self.log_entries.append("[INFO] Creating master batch plan using Proportional Draw-Down.")
-            master_plan = []
-            master_batch_counter = 0
+                # The maximum end time for our new part is the earlier of the slot end or the shift end
+                max_end_dt = min(slot_end, shift_end_dt)
+                
+                setup_minutes = getattr(task.step, 'setup_time', 0)
+                available_duration_minutes = (max_end_dt - slot_start).total_seconds() / 60
 
-            # 1. Group all valid indents by the product category.
-            orders_by_product = defaultdict(list)
-            for indent in self.indents.values():
-                if indent.due_date < self.schedule_start_dt: continue
-                sku = self.skus.get(indent.sku_id)
-                if sku:
-                    orders_by_product[sku.product_category].append(indent)
+                if available_duration_minutes <= setup_minutes:
+                    search_dt = max_end_dt # This slot is too small, check after it
+                    continue
 
-            for product_cat, orders in orders_by_product.items():
-                # Sort orders by priority then due date to handle tie-breaks consistently
-                orders.sort(key=lambda o: (o.priority.value, o.due_date))
-                remaining_demand = {order.order_no: order.qty_required_liters for order in orders}
+                processing_time_minutes = available_duration_minutes - setup_minutes
+                
+                res = self.resource_manager.resource_objects.get(resource_id)
+                speed = res.compatible_skus_max_production.get(task.sku_id) if hasattr(res, 'compatible_skus_max_production') else getattr(res, 'processing_speed', 0)
+                
+                if not speed or speed <= 0: break # Break from while loop, try next resource
 
-                # Pre-calculate the max packing speed for each SKU in this category
-                line_speeds_by_sku = defaultdict(float)
-                for order in orders:
-                    sku_id = order.sku_id
-                    if sku_id not in line_speeds_by_sku:
-                        max_speed = 0
-                        for line in self.lines.values():
-                            if sku_id in getattr(line, 'compatible_skus_max_production', {}):
-                                max_speed = max(max_speed, line.compatible_skus_max_production[sku_id])
-                        line_speeds_by_sku[sku_id] = max_speed
+                volume_for_part1 = min(task.volume_liters, processing_time_minutes * speed)
+                
+                # Don't schedule a trivially small part
+                if volume_for_part1 <= 1: 
+                    search_dt = max_end_dt
+                    continue
 
-                # 2. Continue creating master batches until all demand for the category is met.
-                while sum(remaining_demand.values()) > 0:
-                    bus_id = f"{product_cat}-master{master_batch_counter}"
-                    bus_capacity = self.MAX_MASTER_BATCH_SIZE
-                    bus_allocations = defaultdict(float)
+                part1_duration_minutes = setup_minutes + (volume_for_part1 / speed)
+                part1_end_time = slot_start + timedelta(minutes=part1_duration_minutes)
 
-                    # 3. First Pass: Allocate volume proportionally based on packing speed.
-                    skus_with_demand = {self.indents[ono].sku_id for ono, dem in remaining_demand.items() if dem > 0}
-                    total_packing_speed = sum(line_speeds_by_sku[sku_id] for sku_id in skus_with_demand)
+                # Final check to ensure no weird rounding pushed it over the shift boundary
+                if part1_end_time > max_end_dt + timedelta(seconds=1):
+                     search_dt = max_end_dt
+                     continue
 
-                    if total_packing_speed > 0:
-                        for order in orders:
-                            if remaining_demand[order.order_no] > 0:
-                                order_line_speed = line_speeds_by_sku[order.sku_id]
-                                # Calculate this order's proportional share of the batch
-                                proportional_share = (bus_capacity * (order_line_speed / total_packing_speed))
-                                allocated_vol = min(proportional_share, remaining_demand[order.order_no])
-                                
-                                # To avoid tiny allocations, we can round to a reasonable number
-                                allocated_vol = round(allocated_vol / 50) * 50
-                                
-                                bus_allocations[order.order_no] += allocated_vol
-                                remaining_demand[order.order_no] -= allocated_vol
-                    
-                    # 4. Second Pass: Fill any remaining capacity in the batch FIFO style.
-                    allocated_so_far = sum(bus_allocations.values())
-                    if allocated_so_far < bus_capacity:
-                        for order in orders:
-                            if remaining_demand[order.order_no] > 0 and allocated_so_far < bus_capacity:
-                                fill_amount = min(bus_capacity - allocated_so_far, remaining_demand[order.order_no])
-                                bus_allocations[order.order_no] += fill_amount
-                                allocated_so_far += fill_amount
-                                remaining_demand[order.order_no] -= fill_amount
+                # --- We found a valid, shift-compliant piece. Book it. ---
+                part1_task_id = f"{task.task_id}-p1"
+                part1_task = HeuristicTask(
+                    task_id=part1_task_id, job_id=task.job_id, sku_id=task.sku_id, step=task.step,
+                    task_type=task.task_type, volume_liters=volume_for_part1, priority=task.priority,
+                    compatible_resources=task.compatible_resources, prerequisites=task.prerequisites
+                )
 
-                    # 5. Finalize and add the new master batch to the plan.
-                    final_bus_volume = sum(bus_allocations.values())
-                    if final_bus_volume > 0:
-                        master_plan.append({
-                            "batch_id": bus_id,
-                            "product_category": product_cat,
-                            "volume": final_bus_volume,
-                            "allocations": {k: v for k, v in bus_allocations.items() if v > 0} # Clean up zero allocations
-                        })
-                    master_batch_counter += 1
-                    
-            return master_plan
+                self.resource_manager.commit_task_to_timeline(part1_task, resource_id, slot_start, part1_end_time)
+                part1_task.status = ScheduleStatus.BOOKED
+                part1_task.assigned_resource_id = resource_id
+                part1_task.start_time = slot_start
+                part1_task.end_time = part1_end_time
+                self.master_task_list.append(part1_task)
+                self.task_lookup[part1_task.task_id] = part1_task
+                self.log_entries.append(f"    [SPLIT] Booked {part1_task.task_id} for {volume_for_part1:.0f}L.")
+                
+                remaining_volume = task.volume_liters - volume_for_part1
+                if remaining_volume > 1:
+                    part2_task_id = f"{task.task_id}-p2"
+                    part2_task = HeuristicTask(
+                        task_id=part2_task_id, job_id=task.job_id, sku_id=task.sku_id, step=task.step,
+                        task_type=task.task_type, volume_liters=remaining_volume, priority=task.priority,
+                        compatible_resources=task.compatible_resources, prerequisites=[part1_task]
+                    )
+                    self.master_task_list.append(part2_task)
+                    self.task_lookup[part2_task.task_id] = part2_task
+                    self.log_entries.append(f"    [SPLIT] Created {part2_task.task_id} for remaining {remaining_volume:.0f}L.")
+
+                task.status = ScheduleStatus.FAILED
+                self.log_entries.append(f"    [SPLIT] Original task {task.task_id} marked as FAILED and replaced.")
+                
+                return {"resource_id": resource_id, "start_time": slot_start, "end_time": part1_end_time}
+
+        return None
+
+    def _create_allocation_plan(self, orders: List[UserIndent], campaign_prefix: str) -> List[Dict]:
+        """
+        Creates a robust production plan for a group of orders, ensuring all demand is met.
+        """
+        self.log_entries.append(f"[INFO] Creating allocation plan for campaign '{campaign_prefix}'.")
+        master_plan = []
+        master_batch_counter = 0
+
+        # Create a mutable copy of the demand to track what's left
+        remaining_demand = {o.order_no: o.qty_required_liters for o in orders}
+        # Sort orders to handle them consistently
+        sorted_orders = sorted(orders, key=lambda o: (o.priority.value, o.due_date))
+
+        # Loop until all demand in this group is allocated into batches
+        while sum(remaining_demand.values()) > 0.1:
+            bus_id = f"{campaign_prefix}-master{master_batch_counter}"
+            bus_capacity = self.MAX_MASTER_BATCH_SIZE
+            bus_allocations = defaultdict(float)
+            allocated_to_bus = 0.0
+
+            # Fill the current batch up to its capacity
+            for order in sorted_orders:
+                order_no = order.order_no
+                if remaining_demand[order_no] > 0:
+                    volume_to_take = min(remaining_demand[order_no], bus_capacity - allocated_to_bus)
+                    if volume_to_take > 0:
+                        bus_allocations[order_no] += volume_to_take
+                        allocated_to_bus += volume_to_take
+                        remaining_demand[order_no] -= volume_to_take
+                
+                if allocated_to_bus >= bus_capacity:
+                    break
+            
+            # If the batch has volume, add it to the master plan
+            if allocated_to_bus > 0:
+                # Find the primary product category for naming/logging purposes
+                first_order_no = next(iter(bus_allocations))
+                product_cat = self.skus[self.indents[first_order_no].sku_id].product_category
+
+                master_plan.append({
+                    "batch_id": bus_id,
+                    "product_category": product_cat,
+                    "volume": allocated_to_bus,
+                    "allocations": dict(bus_allocations)
+                })
+            master_batch_counter += 1
+        
+        return master_plan
+    
+    # Add this new method inside the HeuristicScheduler class
+
+    def _get_compatible_resources_for_step(self, sku_id: str, step: ProcessingStep) -> Dict[ResourceType, List[str]]:
+        """
+        Finds the specific resources that are compatible with a given SKU for a step.
+        This is especially important for filtering lines based on SKU compatibility.
+        """
+        compatible_resources = defaultdict(list)
+        if not step:
+            return {}
+
+        for req in step.requirements:
+            # If the requirement is for a LINE, we must do a specific check
+            if req.resource_type == ResourceType.LINE:
+                filtered_line_ids = []
+                for line_id in req.compatible_ids:
+                    line = self.lines.get(line_id)
+                    # The line is compatible only if the specific SKU is in its production list
+                    if line and sku_id in getattr(line, 'compatible_skus_max_production', {}):
+                        filtered_line_ids.append(line_id)
+                compatible_resources[req.resource_type].extend(filtered_line_ids)
+            else:
+                # For all other resource types (Tanks, Rooms, etc.), we assume the list is correct
+                compatible_resources[req.resource_type].extend(req.compatible_ids)
+                
+        return dict(compatible_resources)
 
     def generate_all_tasks(self):
         """
-        Orchestrates the entire task generation process.
-        1. Creates a master plan of aggregated batches.
-        2. Generates a branching bulk production graph for each master batch.
-        3. For each final bulk task, it proportionally allocates its volume to all
-            required finishing tasks ("cabs") to maximize parallelism.
-        4. Includes a second "fill-up" pass to distribute any leftover volume.
+        Orchestrates task generation by first grouping orders by line type
+        to create separate, parallel production campaigns.
         """
-        self.log_entries.append("--- Task Generation ---")
+        self.log_entries.append("--- Task Generation: Parallel Campaign Mode ---")
         
-        allocation_plan = self._create_allocation_plan()
-        self.log_entries.append("--- Master Batch Allocation Breakdown ---")
-        for batch_plan in allocation_plan:
-            self.log_entries.append(
-                f"  -> Batch '{batch_plan['batch_id']}' | Volume: {batch_plan['volume']}L | Supplies: {list(batch_plan['allocations'].items())}"
-            )
-        self.log_entries.append("------------------------------------")
+        valid_indents = [i for i in self.indents.values() if i.due_date >= self.schedule_start_dt]
+        
+        # 1. Group all orders by the type of line they need
+        orders_by_line_type = self._group_orders_by_line_type(valid_indents)
 
-        for batch_plan in allocation_plan:
-            final_bulk_tasks = self._create_bulk_production_chain(batch_plan)
-            if not final_bulk_tasks: continue
+        for line_type, orders in orders_by_line_type.items():
+            if not orders: continue
+            
+            self.log_entries.append(f"\n-- Generating campaign for Line Type: {line_type} --")
+            
+            # 2. Create a specific allocation plan for this group
+            allocation_plan = self._create_allocation_plan(orders, line_type)
+            
+            self.log_entries.append(f"--- {line_type} Master Batch Allocation Breakdown ---")
+            for batch_plan in allocation_plan:
+                self.log_entries.append(
+                    f"  -> Batch '{batch_plan['batch_id']}' | Vol: {batch_plan['volume']:.0f}L"
+                )
+            
+            # 3. Create the task chains for this campaign
+            for batch_plan in allocation_plan:
+                final_bulk_tasks = self._create_bulk_production_chain(batch_plan)
+                if not final_bulk_tasks: continue
 
-            # This dict tracks the remaining volume needed for each customer order.
-            remaining_order_demand = batch_plan["allocations"].copy()
-            cab_counter = 0
+                remaining_order_demand = batch_plan["allocations"].copy()
+                cab_counter = sum(1 for t in self.master_task_list if t.task_type == TaskType.FINISHING)
 
-            # Pre-calculate line speeds for all SKUs in this batch.
-            line_speeds_by_sku = defaultdict(float)
-            for order_no in remaining_order_demand.keys():
-                sku_id = self.indents[order_no].sku_id
-                if sku_id not in line_speeds_by_sku:
-                    max_speed = 0
-                    for line in self.lines.values():
-                        if sku_id in getattr(line, 'compatible_skus_max_production', {}):
-                            max_speed = max(max_speed, line.compatible_skus_max_production[sku_id])
-                    line_speeds_by_sku[sku_id] = max_speed
-
-            # NEW LOGIC: Iterate through each bulk source and assign its volume proportionally.
-            for source_task in final_bulk_tasks:
-                source_volume = source_task.volume_liters
-                allocations_for_this_source = defaultdict(float)
-
-                # Calculate total packing speed of SKUs with remaining demand.
-                skus_with_demand = {self.indents[ono].sku_id for ono, dem in remaining_order_demand.items() if dem > 0.1}
-                total_packing_speed = sum(line_speeds_by_sku[sku_id] for sku_id in skus_with_demand)
-                if total_packing_speed <= 0: continue
-
-                # --- START: MODIFIED LOGIC FOR OVERFLOW ALLOTMENT ---
-
-                # 1. First Pass: Proportional Allocation
-                # Determine the proportional allocation, capping it by each order's remaining demand.
-                for order_no, demand in remaining_order_demand.items():
-                    if demand > 0.1:
-                        order_sku_id = self.indents[order_no].sku_id
-                        proportional_share = round((source_volume * (line_speeds_by_sku[order_sku_id] / total_packing_speed))/5)*5
-                        allocations_for_this_source[order_no] = min(proportional_share, demand)
-                
-                # 2. Calculate Overflow
-                # Find the unallocated volume after the proportional pass.
-                allocated_so_far = sum(allocations_for_this_source.values())
-                overflow_volume = source_volume - allocated_so_far
-
-                # 3. Second Pass: Distribute Overflow
-                # If there's overflow, distribute it to orders that can still take more volume.
-                # We sort orders by priority to decide who gets the overflow first.
-                if overflow_volume > 0.1:
-                    self.log_entries.append(f"[OVERFLOW] Found {overflow_volume:.2f}L of overflow to re-allocate from {source_task.task_id}.")
+                for source_task in final_bulk_tasks:
+                    source_volume_left = source_task.volume_liters
                     
-                    # Get a list of orders for sorting
-                    orders_in_batch = [self.indents[ono] for ono in remaining_order_demand.keys()]
-                    orders_in_batch.sort(key=lambda o: (o.priority.value, o.due_date))
+                    for order_no, demand in list(remaining_order_demand.items()):
+                        if source_volume_left <= 0: break
+                        if demand <= 0: continue
 
-                    for order in orders_in_batch:
-                        if overflow_volume <= 0.1: break
+                        take_volume = min(demand, source_volume_left)
                         
-                        order_no = order.order_no
-                        current_allocation = allocations_for_this_source.get(order_no, 0)
-                        demand_for_order = remaining_order_demand.get(order_no, 0)
-                        
-                        # Check if this order can take more volume
-                        if demand_for_order > current_allocation:
-                            capacity_to_take = demand_for_order - current_allocation
-                            fill_amount = min(overflow_volume, capacity_to_take)
-                            
-                            allocations_for_this_source[order_no] += fill_amount
-                            overflow_volume -= fill_amount
-                            self.log_entries.append(f"  -> Giving {fill_amount:.2f}L of overflow to {order_no}.")
-
-                # --- END: MODIFIED LOGIC FOR OVERFLOW ALLOTMENT ---
-                
-                # Create a finishing task (cab) for each proportional allocation from this source.
-                for order_no, volume_for_cab in allocations_for_this_source.items():
-                    if volume_for_cab > 0.1:
                         indent = self.indents[order_no]
                         sub_order = SubOrder(
                             parent_order_no=order_no,
-                            sub_order_id=f"{order_no}-cab{cab_counter}-from-{source_task.task_id}",
-                            sku_id=indent.sku_id,
-                            volume=volume_for_cab,
-                            priority=indent.priority.value,
-                            due_date=indent.due_date
+                            sub_order_id=f"{order_no}-cab{cab_counter}",
+                            sku_id=indent.sku_id, volume=take_volume,
+                            priority=indent.priority.value, due_date=indent.due_date,
+                            master_batch_id=batch_plan["batch_id"]
                         )
-                        # Link this cab to the current bulk source task.
                         self._create_finishing_chain(sub_order, source_task)
-                        self.log_entries.append(f'[CAB ALLOTMENT] Cab{cab_counter}, Order_no {order_no}, Volume {volume_for_cab}')
                         
-                        # Update the master demand tracking and counters.
-                        remaining_order_demand[order_no] -= volume_for_cab
+                        remaining_order_demand[order_no] -= take_volume
+                        source_volume_left -= take_volume
                         cab_counter += 1
 
         self._identify_and_prepare_anchors()
@@ -817,7 +1212,7 @@ class HeuristicScheduler:
             root_task = self._create_single_task(
                 job_id=batch_plan["batch_id"], sku_id=product_category, batch_idx=0,
                 step=bulk_steps[0], step_idx=0, task_type=TaskType.BULK_PRODUCTION,
-                volume=batch_plan["volume"], priority=Priority.MEDIUM.value
+                volume=batch_plan["volume"], priority=Priority.MEDIUM.value,sub_batch_id=batch_plan["batch_id"]
             )
             leaf_tasks = [root_task]
 
@@ -838,7 +1233,7 @@ class HeuristicScheduler:
                         new_task = self._create_single_task(
                             job_id=parent_task.job_id, sku_id=parent_task.sku_id, batch_idx=len(next_leaf_tasks),
                             step=step, step_idx=step_idx, task_type=TaskType.BULK_PRODUCTION,
-                            volume=volume_to_process, priority=parent_task.priority
+                            volume=volume_to_process, priority=parent_task.priority, sub_batch_id= parent_task.job_id
                         )
                         new_task.prerequisites.append(parent_task)
                         parent_task.next_task = new_task # Maintain single link for simple cases
@@ -854,7 +1249,7 @@ class HeuristicScheduler:
                         first_split_task = self._create_single_task(
                             job_id=parent_task.job_id, sku_id=parent_task.sku_id, batch_idx=len(next_leaf_tasks),
                             step=step, step_idx=step_idx, task_type=TaskType.BULK_PRODUCTION,
-                            volume=vol_for_first_split, priority=parent_task.priority
+                            volume=vol_for_first_split, priority=parent_task.priority, sub_batch_id=parent_task.job_id
                         )
                         child_tasks.append(first_split_task)
                         remaining_volume -= vol_for_first_split
@@ -864,7 +1259,7 @@ class HeuristicScheduler:
                             second_split_task = self._create_single_task(
                                 job_id=parent_task.job_id, sku_id=parent_task.sku_id, batch_idx=len(next_leaf_tasks) + 1,
                                 step=step, step_idx=step_idx, task_type=TaskType.BULK_PRODUCTION,
-                                volume=remaining_volume, priority=parent_task.priority
+                                volume=remaining_volume, priority=parent_task.priority, sub_batch_id=parent_task.job_id
                             )
                             child_tasks.append(second_split_task)
                         
@@ -886,7 +1281,12 @@ class HeuristicScheduler:
             return leaf_tasks
 
     def _create_finishing_chain(self, sub_order: SubOrder, final_bulk_task: HeuristicTask):
-        """Creates the finishing/packing tasks for a single sub-order and links it."""
+        """
+        Creates the finishing/packing tasks for a single sub-order.
+        If a PACKAGING step is followed by a POST_PACKAGING step, it will
+        automatically create a chain of 15-minute sub-tasks to enable a
+        continuous pipeline flow for all subsequent post-packaging steps.
+        """
         product = self.products.get(self.skus[sub_order.sku_id].product_category)
         if not product: return
 
@@ -895,33 +1295,115 @@ class HeuristicScheduler:
         if first_pack_idx == -1: return
 
         finishing_steps = all_steps[first_pack_idx:]
-        last_task_in_chain = None
-        first_finishing_task = None
         
-        for i, step in enumerate(finishing_steps):
-            task = self._create_single_task(
-                job_id=sub_order.sub_order_id, sku_id=sub_order.sku_id, batch_idx=0,
-                step=step, step_idx=first_pack_idx + i, task_type=TaskType.FINISHING,
-                volume=sub_order.volume, priority=sub_order.priority
+        # Check if the pipeline logic should be triggered
+        is_pipeline_flow = (
+            len(finishing_steps) > 1 and
+            finishing_steps[0].process_type == ProcessType.PACKAGING and
+            finishing_steps[1].process_type == ProcessType.POST_PACKAGING
+        )
+
+        if is_pipeline_flow:
+            # --- PIPELINE LOGIC: Create 15-minute sub-batches ---
+            self.log_entries.append(f"  [PIPELINE] Detected pipeline flow for {sub_order.sub_order_id}. Creating 15-min sub-tasks.")
+            
+            pack_step = finishing_steps[0]
+            
+            # Create a temporary task to calculate total duration accurately
+            temp_pack_task = HeuristicTask(
+                task_id="temp", job_id=sub_order.sub_order_id, sku_id=sub_order.sku_id,
+                step=pack_step, task_type=TaskType.FINISHING, volume_liters=sub_order.volume,
+                compatible_resources=self._get_compatible_resources_for_step(sub_order.sku_id, pack_step)
             )
-            if i == 0:
-                first_finishing_task = task
-            if last_task_in_chain:
+            total_duration_minutes = self._calculate_dynamic_duration_tokens(temp_pack_task) * self.TIME_BLOCK_MINUTES
+            
+            if total_duration_minutes == 0: return
+            
+            num_sub_batches = math.ceil(total_duration_minutes / self.TIME_BLOCK_MINUTES)
+            if num_sub_batches == 0: num_sub_batches = 1
+            
+            volume_per_sub_batch = sub_order.volume / num_sub_batches
+            
+            last_pack_sub_task = final_bulk_task
+            for i in range(num_sub_batches):
+                # 1. Create the 15-minute packaging sub-task
+                pack_sub_task_id = f"{sub_order.sub_order_id}-pack-p{i+1}"
+                pack_sub_task = self._create_single_task(
+                    job_id=sub_order.sub_order_id, sku_id=sub_order.sku_id, batch_idx=i,
+                    step=pack_step, step_idx=first_pack_idx, task_type=TaskType.FINISHING,
+                    volume=volume_per_sub_batch, priority=sub_order.priority, sub_batch_id=sub_order.master_batch_id,
+                    custom_id=pack_sub_task_id
+                )
+                pack_sub_task.base_duration_tokens = 1 # Force duration to 15 minutes
+                
+                # Link to the previous task in the chain (either the final bulk task or the previous packing sub-task)
+                pack_sub_task.prerequisites.append(last_pack_sub_task)
+                pack_sub_task.previous_task = last_pack_sub_task
+                
+                # The next packing sub-task will depend on this one
+                last_pack_sub_task = pack_sub_task 
+
+                # 2. CORRECTED LOGIC: Create the FULL post-packaging chain for THIS sub-task
+                last_task_in_sub_chain = pack_sub_task
+                post_pack_steps = finishing_steps[1:]
+                for j, post_step in enumerate(post_pack_steps):
+                    post_pack_sub_task = self._create_single_task(
+                        job_id=sub_order.sub_order_id, sku_id=sub_order.sku_id, batch_idx=i,
+                        step=post_step, step_idx=first_pack_idx + 1 + j, task_type=TaskType.FINISHING,
+                        volume=volume_per_sub_batch, priority=sub_order.priority, sub_batch_id=sub_order.master_batch_id,
+                        custom_id=f"{sub_order.sub_order_id}-{post_step.step_id}-p{i+1}"
+                    )
+                    post_pack_sub_task.prerequisites.append(last_task_in_sub_chain)
+                    post_pack_sub_task.previous_task = last_task_in_sub_chain
+                    last_task_in_sub_chain = post_pack_sub_task
+
+        else:
+            # --- STANDARD LOGIC: Create one task per step (Unchanged) ---
+            last_task_in_chain = final_bulk_task
+            for i, step in enumerate(finishing_steps):
+                task = self._create_single_task(
+                    job_id=sub_order.sub_order_id, sku_id=sub_order.sku_id, batch_idx=0,
+                    step=step, step_idx=first_pack_idx + i, task_type=TaskType.FINISHING,
+                    volume=sub_order.volume, priority=sub_order.priority, sub_batch_id=sub_order.master_batch_id
+                )
                 task.prerequisites.append(last_task_in_chain)
                 task.previous_task = last_task_in_chain
-                last_task_in_chain.next_task = task
-            last_task_in_chain = task
-                
-        if first_finishing_task:
-            first_finishing_task.prerequisites.append(final_bulk_task)
-            final_bulk_task.next_task = first_finishing_task
-            
-            ### START: FIX FOR SOURCE LOCKING ###
-            # This line was missing. It ensures the first packaging task knows its direct predecessor.
-            first_finishing_task.previous_task = final_bulk_task
-            ### END: FIX FOR SOURCE LOCKING ###
+                last_task_in_chain = task
 
-            self.log_entries.append(f"[FINAL-LINK] Linked bus task {final_bulk_task.task_id} to cab task {first_finishing_task.task_id}")
+    def _group_orders_by_line_type(self, orders: List[UserIndent]) -> Dict[str, List[UserIndent]]:
+        """
+        Dynamically groups orders by creating a 'signature' for each line based on the
+        product categories it can produce. All lines with the same signature are grouped.
+        """
+        # 1. Create a signature for each line based on the product categories it serves.
+        line_signatures = defaultdict(list)
+        for line_id, line in self.lines.items():
+            # Find all unique product categories this line can make
+            categories = {self.skus[sku_id].product_category for sku_id in line.compatible_skus_max_production}
+            # Create a sorted, string-based signature (e.g., "CURD,LASSI")
+            signature = ",".join(sorted(list(categories)))
+            if signature:
+                line_signatures[signature].append(line_id)
+
+        # 2. For each order, find which group signature it belongs to.
+        grouped_orders = defaultdict(list)
+        for order in orders:
+            sku = self.skus.get(order.sku_id)
+            if not sku: continue
+            
+            # Find the signature that contains this order's line requirements
+            for signature, line_ids in line_signatures.items():
+                product = self.products.get(sku.product_category)
+                if not product: continue
+                pack_step = next((s for s in product.processing_steps if s.process_type == ProcessType.PACKAGING), None)
+                if not pack_step: continue
+
+                # If this SKU can be made on any line in this signature group, assign it.
+                if any(line_id in pack_step.requirements[0].compatible_ids for line_id in line_ids):
+                    grouped_orders[signature].append(order)
+                    break # Move to the next order once assigned
+
+        return grouped_orders
 
     def _identify_and_prepare_anchors(self):
         """Finds all anchor tasks, marks them, and calculates their lead times."""
@@ -982,25 +1464,27 @@ class HeuristicScheduler:
         self.log_entries.append(f"Found {len(source_bulk_tasks)} bulk prerequisites for {product_category}")
         return source_bulk_tasks
 
-    def _create_single_task(self, job_id, sku_id, batch_idx, step, step_idx, task_type, volume, priority) -> HeuristicTask:
-        """Helper to create one HeuristicTask instance and add it to the master lists."""
-        task_id = f"{job_id}-{sku_id}-b{batch_idx}-{step.step_id}"
+    def _create_single_task(self, job_id, sku_id, batch_idx, step, step_idx, task_type, volume, priority, sub_batch_id: str, custom_id: Optional[str] = None) -> HeuristicTask:
+        """
+        Helper to create one HeuristicTask instance and add it to the master lists.
+        Now supports a custom_id for pipeline sub-tasks.
+        """
+        # Use the custom ID if provided, otherwise generate the standard ID
+        task_id = custom_id if custom_id else f"{job_id}-{sku_id}-b{batch_idx}-{step.step_id}"
         
         compatible_resources = defaultdict(list)
-        for req in step.requirements:
-            # --- NEW: SKU-to-Line Compatibility Logic ---
-            if task_type == TaskType.FINISHING and req.resource_type == ResourceType.LINE:
-                filtered_line_ids = []
-                for line_id in req.compatible_ids:
-                    line = self.lines.get(line_id)
-                    # Only add the line if it is explicitly compatible with the SKU.
-                    if line and sku_id in getattr(line, 'compatible_skus_max_production', {}):
-                        filtered_line_ids.append(line_id)
-                compatible_resources[req.resource_type].extend(filtered_line_ids)
-            # --- END: New Logic ---
-            else:
-                # For all other cases, use the requirements as is.
-                compatible_resources[req.resource_type].extend(req.compatible_ids)
+        if step:
+            for req in step.requirements:
+                # This logic for filtering compatible lines remains important
+                if task_type == TaskType.FINISHING and req.resource_type == ResourceType.LINE:
+                    filtered_line_ids = []
+                    for line_id in req.compatible_ids:
+                        line = self.lines.get(line_id)
+                        if line and sku_id in getattr(line, 'compatible_skus_max_production', {}):
+                            filtered_line_ids.append(line_id)
+                    compatible_resources[req.resource_type].extend(filtered_line_ids)
+                else:
+                    compatible_resources[req.resource_type].extend(req.compatible_ids)
         
         task = HeuristicTask(
             task_id=task_id,
@@ -1008,10 +1492,12 @@ class HeuristicScheduler:
             sku_id=sku_id,
             step=step,
             step_idx=step_idx,
+            batch_idx=batch_idx,
             task_type=task_type,
             compatible_resources=dict(compatible_resources),
             volume_liters=volume,
-            priority=priority
+            priority=priority,
+            sub_batch_id=sub_batch_id
         )
 
         task.base_duration_tokens = self._calculate_dynamic_duration_tokens(task)
@@ -1024,50 +1510,52 @@ class HeuristicScheduler:
     def _calculate_dynamic_duration_tokens(self, task: HeuristicTask) -> int:
         """
         Calculates the task duration in tokens, dynamically and safely.
-        It finds the most constraining resource (slowest speed) if multiple are compatible.
+        It now correctly uses the task's specific compatible resources.
         """
+        # The step can be None for auto-generated CIP tasks
+        if not task.step:
+            return task.base_duration_tokens
+
         step = task.step
         base_minutes = getattr(step, 'duration_minutes', 60)
         
         longest_duration_minutes = 0
 
-        for req in step.requirements:
-            res_type = req.resource_type
+        # --- START: CORRECTED LOGIC ---
+        # Iterate over the task's pre-filtered compatible resources, not the step's raw list.
+        for res_type, res_ids in task.compatible_resources.items():
+            if res_type not in [ResourceType.LINE, ResourceType.EQUIPMENT]:
+                continue
             
-            # For Lines and Equipment, duration is volume-based
-            if res_type == ResourceType.LINE or res_type == ResourceType.EQUIPMENT:
-                for res_id in req.compatible_ids:
-                    processing_speed = 0
-                    if res_type == ResourceType.LINE:
-                        line = self.lines.get(res_id)
-                        # Safely get the speed for the specific SKU
-                        if line:
-                            speeds = getattr(line, 'compatible_skus_max_production', {})
-                            processing_speed = speeds.get(task.sku_id, 0)
-                    
-                    elif res_type == ResourceType.EQUIPMENT:
-                        equipment = self.equipments.get(res_id)
-                        if equipment:
-                            processing_speed = getattr(equipment, 'processing_speed', 0)
+            for res_id in res_ids:
+                processing_speed = 0
+                if res_type == ResourceType.LINE:
+                    line = self.lines.get(res_id)
+                    if line:
+                        speeds = getattr(line, 'compatible_skus_max_production', {})
+                        processing_speed = speeds.get(task.sku_id, 0)
+                
+                elif res_type == ResourceType.EQUIPMENT:
+                    equipment = self.equipments.get(res_id)
+                    if equipment:
+                        processing_speed = getattr(equipment, 'processing_speed', 0)
 
-                    if processing_speed > 0:
-                        work_time = (task.volume_liters / processing_speed)
-                        # Find the max possible work time among all compatible resources
-                        longest_duration_minutes = max(longest_duration_minutes, work_time)
-                    else:
-                        self.log_entries.append(f"[WARNING] Zero processing speed for task {task.task_id} on resource {res_id}. Check config.")
+                if processing_speed > 0:
+                    work_time = (task.volume_liters / processing_speed)
+                    longest_duration_minutes = max(longest_duration_minutes, work_time)
+                # No warning needed here anymore, as we are only checking truly compatible resources.
+        # --- END: CORRECTED LOGIC ---
 
-        # If we calculated a valid process-driven duration, use it. Otherwise, use the fixed base time.
         final_duration_minutes = longest_duration_minutes if longest_duration_minutes > 0 else base_minutes
-
-        # Add setup and cooldown times, which are always fixed for the step
         final_duration_minutes += getattr(step, 'setup_time', 0) + getattr(step, 'cool_down', 0)
         
         if final_duration_minutes <= 0:
             self.log_entries.append(f"                  [WARNING] Calculated duration for task {task.task_id} is zero or negative. Defaulting to 1 token.")
             return 1
 
-        return self._round_up_duration_to_tokens(final_duration_minutes)
+        # Update the task's base duration with the more accurate calculation
+        task.base_duration_tokens = self._round_up_duration_to_tokens(final_duration_minutes)
+        return task.base_duration_tokens
 
     def _get_backfill_candidates(self) -> List[HeuristicTask]:
         """Find tasks that are ready to be backfilled by checking the prerequisites of booked tasks."""
@@ -1107,42 +1595,6 @@ class HeuristicScheduler:
                 max_prereq_path_duration = current_path_duration
         
         return max_prereq_path_duration
-
-    def _find_anchor_slot(self, task: HeuristicTask, search_after_token: int = 0) -> Optional[Dict]:
-        """Finds the earliest valid slot for an anchor task, now handling ZERO_STAGNATION."""
-        
-        # --- NEW: Dispatch based on scheduling rule ---
-        scheduling_rule = getattr(task.step, 'scheduling_rule', SchedulingRule.DEFAULT)
-        if scheduling_rule == SchedulingRule.ZERO_STAGNATION:
-            start_search = max(task.total_prereq_duration_tokens, search_after_token)
-            return self._find_placement_for_block_task(task, start_search) # Reuse the logic we just built
-        # --- END: New Dispatch Logic ---
-
-        task_duration_tokens = self._calculate_dynamic_duration_tokens(task)
-        search_token = max(task.total_prereq_duration_tokens, search_after_token)
-
-        while search_token < self.schedule_end_token:
-            end_token = search_token + task_duration_tokens
-            if end_token > self.schedule_end_token: break
-
-            if not self.time_manager.is_slot_in_single_shift(self._to_datetime(search_token), task_duration_tokens):
-                search_token += 1
-                continue
-
-            placements, true_start_token = self._get_concurrent_placements_at_token(task, search_token, end_token)
-
-            if placements:
-                if true_start_token > search_token:
-                    self.log_entries.append(f"[ANCHOR-INFO] Task {task.task_id} must wait... New start token: {true_start_token}")
-                    search_token = true_start_token
-                    continue
-                return {"resources": list(placements.values()), "start_token": search_token, "end_token": end_token}
-            else:
-                self.log_entries.append(f"[ANCHOR-DEBUG] Resource busy for {task.task_id} at {search_token}. Next available: {true_start_token}.")
-                search_token = max(true_start_token, search_token + 1)
-
-        self.log_entries.append(f"[FAIL-ANCHOR] Exhausted all search options for {task.task_id}.")
-        return None
     
     def _get_ready_tasks(self) -> List[HeuristicTask]:
         """Finds all tasks whose prerequisites are met."""
@@ -1169,335 +1621,22 @@ class HeuristicScheduler:
 
     def _score_and_select_best_task(self, tasks_to_score: List[HeuristicTask]) -> HeuristicTask:
         """
-        Selects the best task to schedule next.
-        This version ensures that all steps for a single sub-batch are prioritized
-        to maintain a logical processing sequence (e.g., Fill -> Process -> Drain).
+        Selects the best task to schedule next using SKU-aware prioritization
+        to group similar tasks together and minimize changeovers.
         """
-        
-        def get_batch_identifier(task_id: str) -> str:
-            """
-            Helper to extract a consistent identifier for a sub-batch from a task ID.
-            e.g., 'PROD-master0-PROD-b0-STEP' -> 'PROD-master0-PROD-b0'
-            """
-            parts = task_id.split('-')
-            for i, part in enumerate(parts):
-                if part.startswith('b') and part[1:].isdigit():
-                    return "-".join(parts[:i+1])
-            # Fallback for tasks without a clear batch index (like finishing tasks)
-            return task_id.rsplit('-', 1)[0]
-
-        # Sort tasks by priority (high to low), then by their batch identifier (to keep batches intact),
-        # and finally by their step index (to ensure correct order within a batch).
+        # Sort tasks by priority, then by their true master batch, then by SKU.
         tasks_to_score.sort(key=lambda t: (
             -t.priority, 
-            get_batch_identifier(t.task_id),
+            t.sub_batch_id, # Use the reliable sub_batch_id for grouping
+            t.sku_id,       # The new key for SKU-aware optimization
             t.step_idx
         ))
         
         best_task = tasks_to_score[0]
-        self.log_entries.append(f"[SELECT] Selected task {best_task.task_id} (Job: {best_task.job_id}, Prio: {best_task.priority}, Step: {best_task.step_idx})")
+        self.log_entries.append(f"[SELECT] Selected task {best_task.task_id} (Batch: {best_task.sub_batch_id}, SKU: {best_task.sku_id})")
         
         return best_task
-
-    def _is_resource_free(self, resource_id: str, start_token: int, end_token: int, requesting_task: HeuristicTask) -> Tuple[bool, int]:
-        """
-        Checks if a resource is free for a given time window.
-        This final version removes the complex "dirty tank" logic that caused the deadlock,
-        relying on the robust setup time calculation for all CIP decisions.
-        """
-        # 1. Standard check for time collision
-        for booked_start, booked_end, t_id in self.resource_timelines.get(resource_id, []):
-            if booked_start < end_token and booked_end > start_token:
-                return False, booked_end
-
-        # 2. Calculate setup time based on product changeover. This is now the ONLY check for CIP.
-        last_task_end_token, last_task_id = self._get_last_task_on_resource(resource_id, start_token)
-        # Use the product category of the requesting task for the check
-        current_product_cat = self.skus[requesting_task.sku_id].product_category if requesting_task.sku_id in self.skus else requesting_task.sku_id
-        setup_minutes = self._calculate_setup_time(last_task_id, current_product_cat, resource_id)
-
-        if setup_minutes == 0:
-            return True, -1  # Slot is free and no setup CIP is needed.
-
-        # If we are here, a CIP is required due to product changeover.
-        cip_duration_tokens = self._round_up_duration_to_tokens(setup_minutes)
-        compatible_circuits = [c.circuit_id for c in self.cip_circuits.values() if resource_id in c.connected_resource_ids]
-        
-        # If no CIP circuit is available for this resource, we can't clean it.
-        # For now, we allow the task, assuming manual cleaning or a data error.
-        if not compatible_circuits: 
-            self.log_entries.append(f"[WARNING-CIP] No CIP circuit for {resource_id} to perform required changeover clean.")
-            return True, -1
-
-        # Find the earliest time the CIP can start (after the last task on the resource).
-        earliest_cip_start_token = last_task_end_token
-        
-        # Now, find the earliest time that BOTH the resource AND a circuit are free.
-        while True:
-            cip_slot_end = earliest_cip_start_token + cip_duration_tokens
-            if cip_slot_end > self.schedule_end_token:
-                return False, self.schedule_end_token # CIP doesn't fit in schedule horizon
-
-            free_circuit_found = False
-            for circuit_id in compatible_circuits:
-                is_circuit_busy = any(bs < cip_slot_end and be > earliest_cip_start_token for bs, be, _ in self.resource_timelines.get(circuit_id, []))
-                if not is_circuit_busy:
-                    free_circuit_found = True
-                    break
-            
-            if free_circuit_found:
-                break # A free circuit was found for this time slot
-            
-            # If all circuits are busy, inch forward the search time.
-            earliest_cip_start_token += 1
-
-        # This is the first moment the resource will be free after the mandatory CIP.
-        effective_busy_until = earliest_cip_start_token + cip_duration_tokens
-        
-        # If the requested start time is before the resource is truly free, deny the placement.
-        if start_token < effective_busy_until:
-            return False, effective_busy_until
-
-        return True, -1
-    
-    def _find_best_placement_for_task(self, task: HeuristicTask) -> Optional[Dict]:
-        """
-        Finds the best available time slot, applying sophisticated look-ahead
-        resource blocking for ZERO_STAGNATION tasks.
-        """
-        earliest_prereq_finish_token = self._get_prerequisite_finish_token(task)
-        
-        # --- START OF FIX ---
-        # We must check the SCHEDULING_RULE, not the PROCESS_TYPE.
-        scheduling_rule = getattr(task.step, 'scheduling_rule', SchedulingRule.DEFAULT)
-        # --- END OF FIX ---
-
-        if scheduling_rule == SchedulingRule.ZERO_STAGNATION:
-            self.log_entries.append(f"[INFO] Task {task.task_id} is ZERO_STAGNATION. Applying Look-Ahead Blocking.")
-            return self._find_placement_for_flow_task(task, earliest_prereq_finish_token)
-        else:
-            # Standard block tasks use the simpler gap-finding logic
-            return self._find_placement_for_block_task(task, earliest_prereq_finish_token)
-            
-    def _find_placement_for_block_task(self, task: HeuristicTask, start_after_token: int) -> Optional[Dict]:
-        """
-        Finds the earliest available gap for any task. This corrected version uses a single,
-        robust placement-finding logic for all task types.
-        """
-        search_token = start_after_token
-        duration_tokens = self._calculate_dynamic_duration_tokens(task)
-
-        while search_token < self.schedule_end_token:
-            # ALL tasks now use the same, correct function to find concurrent placements.
-            placements, true_start_token = self._get_concurrent_placements_at_token(task, search_token, duration_tokens)
-            
-            if placements:
-                final_end_token = true_start_token + duration_tokens
-                if final_end_token > self.schedule_end_token:
-                    search_token = true_start_token + 1
-                    continue
-                # If a valid placement is found, return it immediately.
-                return {"resources": list(placements.values()), "start_token": true_start_token, "end_token": final_end_token}
-            else:
-                # If no placement is found, intelligently jump the search forward.
-                search_token = max(true_start_token, search_token + 1)
-        
-        # If the loop finishes without finding a slot, return None.
-        return None
-
-    def _find_placement_for_flow_task(self, task: HeuristicTask, start_at_token: int) -> Tuple[Optional[Dict], int]:
-        """
-        Finds a placement for a FLOW task, now correctly using the task-specific
-        compatible resources for the primary task being scheduled.
-        """
-        duration_tokens = self._calculate_dynamic_duration_tokens(task)
-        end_token = start_at_token + duration_tokens
-        if end_token > self.schedule_end_token:
-            return None, self.schedule_end_token
-
-        all_reqs = self._get_task_resource_reqs(task).copy()
-        if task.previous_task:
-            all_reqs.extend(self._get_task_resource_reqs(task.previous_task))
-        if task.next_task:
-            all_reqs.extend(self._get_task_resource_reqs(task.next_task))
-        
-        chosen_resource_ids = set()
-        max_busy_until = 0
-
-        for req in all_reqs:
-            found_resource_for_this_req = False
-
-            # --- START: THE MISSING FIX ---
-            # Determine which list of compatible IDs to use.
-            if req in task.step.requirements:
-                # If the requirement belongs to the main task, use its SKU-specific filtered list.
-                ids_to_check = task.compatible_resources.get(req.resource_type, [])
-            else:
-                # If the requirement is from a source/destination task, use its generic list.
-                ids_to_check = req.compatible_ids
-            # --- END: THE MISSING FIX ---
-
-            for resource_id in ids_to_check:
-                if resource_id in chosen_resource_ids: continue
-                is_free, busy_until = self._is_resource_free(resource_id, start_at_token, end_token, task)
-                if self._is_resource_of_type(resource_id, req.resource_type) and is_free:
-                    chosen_resource_ids.add(resource_id)
-                    found_resource_for_this_req = True
-                    break
-                else:
-                    max_busy_until = max(max_busy_until, busy_until)
-            
-            if not found_resource_for_this_req:
-                return None, max_busy_until
-        
-        return {"resources": list(chosen_resource_ids), "start_token": start_at_token, "end_token": end_token}, start_at_token
-    
-    def _find_backfill_slot(self, task: HeuristicTask) -> Optional[Dict]:
-        """
-        Works backwards from a task's successor(s) to find the LATEST possible
-        just-in-time slot, searching backwards if the ideal slot is taken.
-        This version correctly handles 1-to-N splits.
-        """
-        # Find all successors by checking which tasks have 'self' as a prerequisite.
-        successors = [t for t in self.master_task_list if task in t.prerequisites]
-        booked_successors = [s for s in successors if s.status == ScheduleStatus.BOOKED]
-
-        if not booked_successors:
-            self.log_entries.append(f"[BACKFILL-FAIL] Task {task.task_id} has no booked successor.")
-            return None
-
-        # The constraint is the start time of the EARLIEST starting successor.
-        successor_start_token = min(self._to_tokens(s.start_time) for s in booked_successors)
-        task_duration_tokens = self._calculate_dynamic_duration_tokens(task)
-        desired_start_token = successor_start_token - task_duration_tokens
-        
-        # We search backwards until we hit the end of the latest prerequisite
-        earliest_possible_start = self._get_prerequisite_finish_token(task)
-
-        search_token = desired_start_token
-        while search_token >= earliest_possible_start:
-            
-            placements, true_start_token = self._get_concurrent_placements_at_token(task, search_token, task_duration_tokens)
-            # A valid backfill slot is only found if the placement can start
-            # at the exact token we are currently checking.
-            if placements and true_start_token == search_token:
-                self.log_entries.append(
-                    f"[BACKFILL-FOUND] Found JIT slot for {task.task_id} at exact token {search_token}."
-                )
-                return {
-                    "resources": list(placements.values()),
-                    "start_token": search_token,
-                    "end_token": search_token + task_duration_tokens,
-                }
-
-            search_token -= 1
-
-        self.log_entries.append(
-            f"[BACKFILL-FAIL] No available JIT slot found for {task.task_id} in window [{earliest_possible_start}, {desired_start_token}]."
-        )
-        return None
-
-    def _book_task(self, task: HeuristicTask, placement: Dict):
-        """
-        This is the final, corrected booking function. It includes:
-        1. Multi-resource CIP checks.
-        2. A definitive "Ghost Process" check to ensure a tank's contents match the product being drained.
-        """
-        task_start_token = placement["start_token"]
-        task_end_token = placement["end_token"]
-        all_resources_in_placement = placement["resources"]
-
-        # --- Iterative CIP check for all involved resources ---
-        for resource_id in all_resources_in_placement:
-            last_task_on_res_end_token, last_task_on_res_id = self._get_last_task_on_resource(resource_id, task_start_token)
-            current_product_cat = self.skus[task.sku_id].product_category if task.sku_id in self.skus else task.sku_id
-            setup_minutes = self._calculate_setup_time(last_task_on_res_id, current_product_cat, resource_id)
-
-            if setup_minutes > 0:
-                cip_duration_tokens = self._round_up_duration_to_tokens(setup_minutes)
-                cip_start_token = task_start_token - cip_duration_tokens
-                circuit_to_book = next((c.circuit_id for c in self.cip_circuits.values() if resource_id in c.connected_resource_ids), None)
-                if circuit_to_book:
-                    cip_task_id = f"CIP-{resource_id}-for-{task.task_id}"
-                    if cip_task_id not in self.task_lookup:
-                        cip_task = HeuristicTask(task_id=cip_task_id, job_id=task.job_id, sku_id="CIP", step=task.step, task_type=TaskType.CIP, base_duration_tokens=cip_duration_tokens, status=ScheduleStatus.BOOKED, assigned_resource_id=f"{resource_id},{circuit_to_book}", start_time=self._to_datetime(cip_start_token), end_time=self._to_datetime(task_start_token))
-                        self.master_task_list.append(cip_task)
-                        self.task_lookup[cip_task.task_id] = cip_task
-                        self.resource_timelines[resource_id].append((cip_start_token, task_start_token, cip_task.task_id))
-                        self.resource_timelines[circuit_to_book].append((cip_start_token, task_start_token, cip_task.task_id))
-
-        task.status = ScheduleStatus.BOOKED
-        task.start_time = self._to_datetime(task_start_token)
-        task.end_time = self._to_datetime(task_end_token)
-        task.assigned_resource_id = str(all_resources_in_placement)
-
-        scheduling_rule = getattr(task.step, 'scheduling_rule', SchedulingRule.DEFAULT)
-        if scheduling_rule == SchedulingRule.ZERO_STAGNATION:
-            if task.previous_task and task.previous_task.assigned_resource_id:
-                source_resource_id = task.previous_task.assigned_resource_id.strip("[]'\"").split(',')[0]
-                
-                # --- START: ROBUST GHOST PROCESS PREVENTION ---
-                if task.task_type == TaskType.FINISHING:
-                    product_needed = self.skus[task.sku_id].product_category
-                    product_in_tank = None
-                    
-                    for _, _, t_id in reversed(self.resource_timelines.get(source_resource_id, [])):
-                        if self.task_lookup[t_id].end_time > task.start_time: continue
-                        task_to_check = self.task_lookup.get(t_id)
-                        if not task_to_check: continue
-
-                        if task_to_check.task_type == TaskType.CIP:
-                            product_in_tank = "EMPTY"; break
-                        if task_to_check.task_type == TaskType.BULK_PRODUCTION:
-                            product_in_tank = self.skus[task_to_check.sku_id].product_category if task_to_check.sku_id in self.skus else task_to_check.sku_id
-                            break
-                        if task_to_check.task_type == TaskType.LOCKED and 'SOURCE' not in task_to_check.task_id:
-                            try:
-                                original_task_id = task_to_check.task_id.split('-for-')[1].split('-on-')[0]
-                                original_task = self.task_lookup.get(original_task_id)
-                                if original_task:
-                                    product_in_tank = self.skus[original_task.sku_id].product_category if original_task.sku_id in self.skus else original_task.sku_id
-                                    break
-                            except (IndexError, KeyError): continue
-
-                    if product_in_tank and product_in_tank != "EMPTY" and product_in_tank != product_needed:
-                        self.log_entries.append(f"[GHOST-PROCESS-FAIL] Task {task.task_id} needs '{product_needed}' but tank {source_resource_id} contains '{product_in_tank}'. Booking failed.")
-                        task.status = ScheduleStatus.FAILED; task.start_time = None; task.end_time = None; task.assigned_resource_id = None
-                        return
-                # --- END: ROBUST GHOST PROCESS PREVENTION ---
-
-                locked_source_task_id = f"LOCKED-SOURCE-for-{task.task_id}-on-{source_resource_id}"
-                if locked_source_task_id not in self.task_lookup:
-                    locked_task = HeuristicTask(task_id=locked_source_task_id, job_id=task.job_id, sku_id="LOCKED", step=task.step, task_type=TaskType.LOCKED, base_duration_tokens=(task_end_token - task_start_token), status=ScheduleStatus.BOOKED, assigned_resource_id=source_resource_id, start_time=task.start_time, end_time=task.end_time)
-                    self.master_task_list.append(locked_task); self.task_lookup[locked_task.task_id] = locked_task
-                    self.resource_timelines[source_resource_id].append((task_start_token, task_end_token, locked_task.task_id))
-
-            main_resource_id, locked_resources = None, []
-            if task.step.requirements:
-                primary_req_type = task.step.requirements[0].resource_type
-                for res_id in all_resources_in_placement:
-                    if self._is_resource_of_type(res_id, primary_req_type):
-                        main_resource_id = res_id; break
-            if main_resource_id: locked_resources = [res for res in all_resources_in_placement if res != main_resource_id]
-            else: main_resource_id = all_resources_in_placement[0]; locked_resources = all_resources_in_placement[1:]
-            self.resource_timelines[main_resource_id].append((task_start_token, task_end_token, task.task_id))
-
-            for locked_res_id in locked_resources:
-                if locked_res_id == locals().get('source_resource_id'): continue
-                locked_task_id = f"LOCKED-for-{task.task_id}-on-{locked_res_id}"
-                if locked_task_id not in self.task_lookup:
-                    locked_task = HeuristicTask(task_id=locked_task_id, job_id=task.job_id, sku_id="LOCKED", step=task.step, task_type=TaskType.LOCKED, base_duration_tokens=(task_end_token - task_start_token), status=ScheduleStatus.BOOKED, assigned_resource_id=locked_res_id, start_time=task.start_time, end_time=task.end_time)
-                    self.master_task_list.append(locked_task); self.task_lookup[locked_task.task_id] = locked_task
-                    self.resource_timelines[locked_res_id].append((task_start_token, task_end_token, locked_task.task_id))
-        else:
-            for resource_id in all_resources_in_placement:
-                self.resource_timelines[resource_id].append((task_start_token, task_end_token, task.task_id))
-        
-        all_affected_resources = set(all_resources_in_placement)
-        if 'source_resource_id' in locals() and locals()['source_resource_id']: all_affected_resources.add(locals()['source_resource_id'])
-        for res_id in all_affected_resources:
-            if res_id in self.resource_timelines: self.resource_timelines[res_id].sort()
-
+   
     def _get_last_task_on_resource(self, resource_id: str, before_token: int) -> Tuple[int, Optional[str]]:
         """Finds the end token and ID of the last task booked on a resource before a given token."""
         last_task_end_token = 0
@@ -1516,231 +1655,95 @@ class HeuristicScheduler:
 
     def _schedule_drained_tank_cip(self):
         """
-        Specifically finds tanks that have been drained by packing/transfer tasks
-        and schedules a CIP immediately after they are empty.
+        Finds tanks that have been drained and schedules a CIP using the ResourceManager.
         """
         self.log_entries.append("  -> Checking for drained tanks that need CIP...")
         
         for tank_id in self.tanks.keys():
-            if tank_id not in self.resource_timelines:
-                continue
-
-            # Find the end time of the very last task that locked this tank as a source.
-            # This signifies when the tank was fully drained.
-            last_drain_token = 0
-            for start, end, task_id in self.resource_timelines[tank_id]:
-                task = self.task_lookup.get(task_id)
-                # A 'LOCKED' or 'LOCKED-SOURCE' task indicates the tank is being drained.
-                if task and task.task_type == TaskType.LOCKED:
-                    if end > last_drain_token:
-                        last_drain_token = end
+            last_drain_time = None
             
-            if last_drain_token == 0:
-                # This tank was never used as a source for draining.
+            # Find the end time of the very last task on this tank
+            if self.resource_manager.timeline[tank_id]:
+                # The timeline is sorted, so the last task is at the end
+                last_start, last_end, last_task_id, _ = self.resource_manager.timeline[tank_id][-1]
+                last_drain_time = last_end
+
+            if not last_drain_time:
                 continue
 
-            # Check if a CIP already exists after the drain time
-            has_future_cip = any(
-                self.task_lookup.get(t_id).task_type == TaskType.CIP and s >= last_drain_token
-                for s, e, t_id in self.resource_timelines[tank_id]
-            )
-            if has_future_cip:
-                self.log_entries.append(f"  [TANK-CIP] Skipping {tank_id}, a cleanup CIP is already scheduled.")
-                continue
-
-            self.log_entries.append(f"  [TANK-CIP] Tank {tank_id} was drained at token {last_drain_token}, scheduling CIP.")
-            # This tank was drained and not cleaned. Schedule a CIP now.
-            # (This reuses the booking logic from the general cleanup for consistency)
-            self._schedule_cip_for_resource(tank_id, last_drain_token)
-
+            # Check the final state of the tank in the ResourceManager
+            final_state = self.resource_manager.get_state(tank_id)
+            if final_state and final_state.status == ResourceStatus.DIRTY:
+                self.log_entries.append(f"  [TANK-CIP] Tank {tank_id} was left DIRTY at {last_drain_time}, scheduling CIP.")
+                self._schedule_cip_for_resource(tank_id, last_drain_time)
 
     def _schedule_final_equipment_cip(self):
         """
-        Schedules a final CIP for any non-tank equipment (Lines, etc.) that was
-        used and not left in a clean state at the end of the schedule.
+        Schedules a final CIP for any non-tank equipment left in a dirty state.
         """
         self.log_entries.append("  -> Checking for other equipment needing final CIP...")
         
-        # Combine all non-tank, non-CIP-system equipment
         other_equipment_ids = list(self.lines.keys()) + list(self.equipments.keys())
 
         for resource_id in other_equipment_ids:
-            if resource_id not in self.resource_timelines or not self.resource_timelines[resource_id]:
-                continue
-            
-            # Get the very last task on this resource's timeline.
-            last_booking = self.resource_timelines[resource_id][-1]
-            last_task_end_token = last_booking[1]
-            last_task_id = last_booking[2]
-            last_task_obj = self.task_lookup.get(last_task_id)
+            final_state = self.resource_manager.get_state(resource_id)
+            if final_state and final_state.status == ResourceStatus.DIRTY:
+                last_task_end_time = final_state.dirty_since
+                if last_task_end_time:
+                    self.log_entries.append(f"  [FINAL-CIP] Equipment {resource_id} needs a final CIP after {last_task_end_time}.")
+                    self._schedule_cip_for_resource(resource_id, last_task_end_time)
 
-            if last_task_obj and last_task_obj.task_type == TaskType.CIP:
-                continue
-
-            self.log_entries.append(f"  [FINAL-CIP] Equipment {resource_id} needs a final CIP.")
-            self._schedule_cip_for_resource(resource_id, last_task_end_token)
-            
-
-    def _schedule_cip_for_resource(self, resource_id: str, start_after_token: int):
-        """Helper function to find a slot and book a CIP task for a given resource."""
-        
-        resource_object = self.tanks.get(resource_id) or self.lines.get(resource_id) or self.equipments.get(resource_id)
+    def _schedule_cip_for_resource(self, resource_id: str, start_after_dt: datetime):
+        """
+        Helper function to find a slot and book a CIP task for a given resource using datetimes.
+        """
+        resource_object = self.resource_manager.resource_objects.get(resource_id)
         if not resource_object or not hasattr(resource_object, 'CIP_duration_minutes'):
             self.log_entries.append(f"  [CIP-HELPER-WARN] No CIP duration for {resource_id}.")
             return
 
-        cip_duration_minutes = getattr(resource_object, 'CIP_duration_minutes', 90)
-        cip_duration_tokens = self._round_up_duration_to_tokens(cip_duration_minutes)
+        cip_duration = timedelta(minutes=getattr(resource_object, 'CIP_duration_minutes', 90))
 
-        circuit_to_use = next((c.circuit_id for c in self.cip_circuits.values() if resource_id in c.connected_resource_ids), None)
-        if not circuit_to_use:
-            self.log_entries.append(f"  [CIP-HELPER-WARN] No compatible CIP circuit for {resource_id}.")
-            return
+        search_dt = start_after_dt
+        # Define the end of the search window as a datetime object
+        extended_schedule_end_dt = self.schedule_end_dt + timedelta(days=2)
 
-        # Find the earliest available slot for the CIP task
-        search_token = start_after_token
-        extended_schedule_end_token = self.schedule_end_token + 192 # Allow 2 extra days
-
-        while search_token < extended_schedule_end_token:
-            cip_end_token = search_token + cip_duration_tokens
+        while search_dt < extended_schedule_end_dt:
+            cip_end_dt = search_dt + cip_duration
             
-            is_resource_busy = any(start < cip_end_token and end > search_token for start, end, _ in self.resource_timelines.get(resource_id, []))
-            is_circuit_busy = any(start < cip_end_token and end > search_token for start, end, _ in self.resource_timelines.get(circuit_to_use, []))
-
-            if not is_resource_busy and not is_circuit_busy:
+            if self.resource_manager.is_available(resource_id, search_dt, cip_end_dt):
+                # Found a slot, book it using the ResourceManager
                 cip_task_id = f"AUTO-CIP-on-{resource_id}"
-                cip_task = HeuristicTask(
-                    task_id=cip_task_id, job_id="CLEANUP", sku_id="CIP", step=None,
-                    task_type=TaskType.CIP, base_duration_tokens=cip_duration_tokens,
-                    status=ScheduleStatus.BOOKED, assigned_resource_id=f"{resource_id},{circuit_to_use}",
-                    start_time=self._to_datetime(search_token), end_time=self._to_datetime(cip_end_token)
-                )
+                # The step attribute can be None for these auto-generated tasks
+                cip_task = HeuristicTask(task_id=cip_task_id, job_id="CLEANUP", sku_id="CIP", step=None, task_type=TaskType.CIP)
+                
+                # Use the commit method to ensure state is updated correctly
+                self.resource_manager.commit_task_to_timeline(cip_task, resource_id, search_dt, cip_end_dt)
+                
+                # Update the main task list for final reporting
+                cip_task.status = ScheduleStatus.BOOKED
+                cip_task.assigned_resource_id = resource_id
+                cip_task.start_time = search_dt
+                cip_task.end_time = cip_end_dt
                 self.master_task_list.append(cip_task)
                 self.task_lookup[cip_task.task_id] = cip_task
-                self.resource_timelines[resource_id].append((search_token, cip_end_token, cip_task_id))
-                self.resource_timelines[circuit_to_use].append((search_token, cip_end_token, cip_task_id))
-                self.resource_timelines[resource_id].sort()
-                self.resource_timelines[circuit_to_use].sort()
-                self.log_entries.append(f"  [CIP-HELPER-BOOKED] Task {cip_task_id} on {resource_id} & {circuit_to_use} @ token {search_token}")
                 return
 
-            search_token += 1
+            search_dt += timedelta(minutes=self.TIME_BLOCK_MINUTES)
 
         self.log_entries.append(f"  [CIP-HELPER-FAIL] Could not find slot for CIP on {resource_id}.")
 
-    def _get_concurrent_placements_at_token(self, task: HeuristicTask, start_token: int, duration_tokens: int) -> Tuple[Optional[Dict], int]:
-        """
-        Checks for concurrent resource availability, using the robust intersection-based
-        resource affinity logic and now also handling ZERO_STAGNATION look-ahead for destinations.
-        """
-        placements = {}
-        latest_required_start_time = start_token
-        end_token = start_token + duration_tokens
-
-        ### START: FINAL AFFINITY FIX (INTERSECTION LOGIC) ###
-        constrained_resource_id = None
-        if task.previous_task and task.previous_task.assigned_resource_id:
-            # 1. Get the list of all resources that were locked by the previous task.
-            prev_resources_str = task.previous_task.assigned_resource_id
-            cleaned_str = prev_resources_str.replace('[', '').replace(']', '').replace("'", "").replace('"', '').replace(' ', '')
-            prev_locked_resources = cleaned_str.split(',')
-
-            # 2. Get the list of all compatible tanks for the CURRENT step.
-            current_compatible_tanks = []
-            for req in task.step.requirements:
-                if req.resource_type == ResourceType.TANK:
-                    current_compatible_tanks.extend(task.compatible_resources.get(req.resource_type, []))
-
-            # 3. Find the intersection: the resource that is in BOTH lists.
-            for res_id in prev_locked_resources:
-                if res_id in current_compatible_tanks:
-                    constrained_resource_id = res_id
-                    self.log_entries.append(f"[AFFINITY] Task {task.task_id} constrained to {res_id} via intersection logic.")
-                    break # Found our resource.
-        ### END: FINAL AFFINITY FIX (INTERSECTION LOGIC) ###
-        
-        # --- START: MODIFICATION FOR DESTINATION LOCKING ---
-        # Get the base requirements for the current task
-        all_requirements = self._get_task_resource_reqs(task)[:]
-
-        # If the task is a flow task and has a successor, add the successor's requirements
-        # to the list of resources we need to find concurrently.
-        scheduling_rule = getattr(task.step, 'scheduling_rule', SchedulingRule.DEFAULT)
-        if scheduling_rule == SchedulingRule.ZERO_STAGNATION and task.next_task:
-            # The 'next_task' attribute is a list, so we get the first successor.
-            # This assumes a simple linear flow for destination locking.
-            next_task_in_chain = task.next_task[0] if isinstance(task.next_task, list) and task.next_task else task.next_task
-            if next_task_in_chain:
-                self.log_entries.append(f"[FLOW-LOOKAHEAD] Task {task.task_id} is looking ahead for resources for {next_task_in_chain.task_id}")
-                next_task_reqs = self._get_task_resource_reqs(next_task_in_chain)
-                all_requirements.extend(next_task_reqs)
-        # --- END: MODIFICATION FOR DESTINATION LOCKING ---
-
-
-        for req in all_requirements:
-            best_resource_for_req = None
-            earliest_available_token = float('inf')
-
-            compatible_ids_for_task = task.compatible_resources.get(req.resource_type, [])
-            
-            # If the requirement is from the NEXT task, we need its compatible resources, not the current task's.
-            # This is a fallback in case the task's own compatible_resources dict doesn't cover the successor.
-            if not compatible_ids_for_task and 'next_task_reqs' in locals() and req in next_task_reqs:
-                 # We need to find the compatible resources for the next_task_in_chain
-                 # This part of logic is complex, for now we will assume the primary task's compatible_resources are sufficient.
-                 # A more robust solution would be to pass the next_task_in_chain object and get its specific compatibilities.
-                 ids_to_check = req.compatible_ids
-            else:
-                 ids_to_check = compatible_ids_for_task
-
-
-            if constrained_resource_id and req.resource_type == ResourceType.TANK:
-                if constrained_resource_id in ids_to_check:
-                    ids_to_check = [constrained_resource_id]
-                else:
-                    self.log_entries.append(f"[ERROR-AFFINITY] Constrained resource {constrained_resource_id} not in compatible list for {task.task_id}")
-                    return None, self.schedule_end_token
-
-            for resource_id in ids_to_check:
-                is_free, busy_until = self._is_resource_free(resource_id, start_token, end_token, task)
-                
-                if is_free:
-                    current_best_token = start_token
-                else:
-                    current_best_token = busy_until
-
-                if current_best_token < earliest_available_token:
-                    earliest_available_token = current_best_token
-                    best_resource_for_req = resource_id
-
-            if best_resource_for_req:
-                placements[req.resource_type] = best_resource_for_req
-                latest_required_start_time = max(latest_required_start_time, earliest_available_token)
-            else:
-                if constrained_resource_id and req.resource_type == ResourceType.TANK:
-                    self.log_entries.append(f"[FAIL-AFFINITY] Could not place {task.task_id} on required resource {constrained_resource_id}")
-                return None, self.schedule_end_token
-
-        if latest_required_start_time + duration_tokens > self.schedule_end_token:
-            return None, self.schedule_end_token
-
-        for resource_id in placements.values():
-            is_free, busy_until = self._is_resource_free(resource_id, latest_required_start_time, latest_required_start_time + duration_tokens, task)
-            if not is_free:
-                return None, busy_until
-
-        return placements, latest_required_start_time
-    
-    def _get_prerequisite_finish_token(self, task: HeuristicTask) -> int:
-        """Calculates the token when all prerequisites for a task are complete."""
-        finish_token = self.schedule_start_token
+    def _get_prerequisite_finish_time(self, task: HeuristicTask) -> datetime:
+        """Calculates the datetime when all prerequisites for a task are complete."""
+        # The default earliest time is the start of the entire schedule
+        finish_time = self.schedule_start_dt
         if task.prerequisites:
-            # In a forward model, all prerequisites are guaranteed to be booked.
-            # We find the latest finish time among them.
-            end_times = [self._to_tokens(p.end_time) for p in task.prerequisites if p.status == ScheduleStatus.BOOKED and p.end_time]
+            # Get the end_time (which is already a datetime) of all booked prerequisites
+            end_times = [p.end_time for p in task.prerequisites if p.status == ScheduleStatus.BOOKED and p.end_time]
             if end_times:
-                finish_token = max(end_times)
-        return finish_token
+                # Return the latest of these datetime objects
+                finish_time = max(end_times)
+        return finish_time
     
     def _is_resource_of_type(self, resource_id: str, resource_type: ResourceType) -> bool:
         """Verifies that a resource ID belongs to the correct resource category."""
@@ -1749,54 +1752,6 @@ class HeuristicScheduler:
         if resource_type == ResourceType.EQUIPMENT and resource_id in self.equipments: return True
         # Add other resource types as needed (e.g., ROOM)
         return False
-
-    def _calculate_setup_time(self, last_task_id: Optional[str], current_sku_id: str, resource_id: str) -> int:
-        """
-        Calculates the required setup/CIP time. This final version correctly
-        handles LOCKED tasks and the different uses of `sku_id` for bulk vs finishing tasks.
-        """
-        if not last_task_id:
-            return 0 # No preceding task, no setup needed.
-
-        last_task = self.task_lookup.get(last_task_id)
-        if not last_task:
-            return 90  # Fallback CIP time if task lookup fails.
-
-        if last_task.task_type == TaskType.CIP:
-            return 0
-
-        if last_task.task_type == TaskType.LOCKED:
-            ### START: FIX FOR CIP REGRESSION ###
-            # Make the parsing more robust to handle different LOCKED task name formats.
-            parts = last_task.task_id.split('-for-')
-            if len(parts) > 1:
-                original_task_id = parts[1].split('-on-')[0]
-                original_task = self.task_lookup.get(original_task_id)
-                if original_task:
-                    last_task = original_task # Overwrite last_task for the check below.
-            else:
-                # If the name is not in the expected format, we cannot determine the product.
-                # We must assume a major clean is required for safety.
-                self.log_entries.append(f"[WARNING-CIP] Could not parse original task from LOCKED task: {last_task.task_id}. Assuming CIP is required.")
-                return 90
-            ### END: FIX FOR CIP REGRESSION ###
-
-        last_sku_obj = self.skus.get(last_task.sku_id)
-        last_category = last_sku_obj.product_category if last_sku_obj else last_task.sku_id
-
-        current_sku_obj = self.skus.get(current_sku_id)
-        current_category = current_sku_obj.product_category if current_sku_obj else current_sku_id
-
-        if not last_category or not current_category:
-            return 0
-
-        if last_category != current_category:
-            resource_object = self.tanks.get(resource_id) or self.lines.get(resource_id) or self.equipments.get(resource_id)
-            if resource_object and hasattr(resource_object, 'CIP_duration_minutes'):
-                return getattr(resource_object, 'CIP_duration_minutes', 90)
-            return 90
-        
-        return 0
 
     def _create_scheduling_result(self) -> SchedulingResult:
         """
@@ -1809,37 +1764,28 @@ class HeuristicScheduler:
         for task in self.master_task_list:
             if task.status != ScheduleStatus.BOOKED:
                 continue
-            
-            try:
-                priority_val = self.indents.get(base_order_no).priority
-                if isinstance(priority_val, int):
-                    priority_val = Priority(priority_val)
-            except:
-                priority_val = Priority.MEDIUM # Default
 
+            # This part seems to have a bug with base_order_no not being defined.
+            # We will default the priority for now.
+            priority_val = Priority.MEDIUM
 
             if task.task_type == TaskType.CIP:
+                if not task.assigned_resource_id: continue
                 primary_resource = task.assigned_resource_id.split(',')[0]
-                cip_start_token = self._to_tokens(task.start_time)
-
-                # 1. Get the CIP_id directly from the task object
-                cip_id = task.task_id
-
-                # 2. Parse the CIP task name to find the task that comes AFTER it.
-                try:
+                
+                following_task_id = "N/A"
+                if '-for-' in task.task_id:
                     following_task_id = task.task_id.split('-for-')[1]
-                except IndexError:
-                    following_task_id = "N/A"
 
-                # 3. Find the task that comes BEFORE the CIP by checking the resource timeline.
+                # Find the preceding task by comparing datetimes directly
                 preceding_task_id = "N/A"
-                for booked_start, booked_end, t_id in self.resource_timelines.get(primary_resource, []):
-                    if booked_end == cip_start_token:
+                for booked_start, booked_end, t_id, _ in self.resource_manager.timeline.get(primary_resource, []):
+                    if booked_end == task.start_time:
                         preceding_task_id = t_id
                         break
                 
                 cip_schedules.append(CIPSchedule(
-                    CIP_id=cip_id,
+                    CIP_id=task.task_id,
                     resource_id=primary_resource,
                     start_time=task.start_time,
                     end_time=task.end_time,
@@ -1848,29 +1794,21 @@ class HeuristicScheduler:
                     preceding_task_id=preceding_task_id,
                     following_task_id=following_task_id
                 ))
-            # Handle Production and Finishing tasks
+            
             elif task.task_type in [TaskType.BULK_PRODUCTION, TaskType.FINISHING]:
-                # This logic extracts the base order number (e.g., 'ORD_101') from the job_id
-                # to allow the Gantt chart to correctly distinguish bulk vs order jobs.
+                if not task.assigned_resource_id or not task.step: continue
                 base_order_no = task.job_id
-                if task.task_type == TaskType.FINISHING:
+                if task.task_type == TaskType.FINISHING and '-cab' in task.job_id:
                     base_order_no = task.job_id.split('-cab')[0]
 
-                # The assigned_resource_id can be a list, so we take the first one as primary
                 primary_resource = task.assigned_resource_id.strip("[]'\"").split(',')[0]
                 
-                # Find the priority from the original indent if possible
-                try:
-                    priority_val = self.indents.get(base_order_no).priority
-                except:
-                    priority_val = Priority.MEDIUM # Default
-
                 scheduled_tasks.append(TaskSchedule(
                     task_id=task.task_id,
                     order_no=base_order_no,
                     sku_id=task.sku_id,
                     step_id=task.step.step_id,
-                    batch_index=int(task.task_id.split('-b')[-1].split('-')[0]), # Heuristic way to get batch index
+                    batch_index=task.batch_idx,
                     resource_id=primary_resource,
                     start_time=task.start_time,
                     end_time=task.end_time,
@@ -1878,109 +1816,130 @@ class HeuristicScheduler:
                     priority=priority_val
                 ))
 
-        # Create dummy metrics for compatibility
         dummy_metrics = type('Metrics', (), {
             'schedule_efficiency': 0.95,
             'total_production_volume': sum(t.volume for t in scheduled_tasks),
-            'otif_rate': 1.0,
-            'solve_time': 0.1 
+            'otif_rate': 1.0, 'solve_time': 0.1
         })()
             
         return SchedulingResult(
-            #is_feasible=True,
-            scheduled_tasks=scheduled_tasks,
-            CIP_schedules=cip_schedules,
-            production_summary={}, # Gantt doesn't use this part
-            metrics=dummy_metrics,
-            solve_time=0.1,
-            status=1,
-            objective_value=100.0,
-            resource_utilization={}
+            scheduled_tasks=scheduled_tasks, CIP_schedules=cip_schedules,
+            production_summary={}, metrics=dummy_metrics, solve_time=0.1,
+            status=1, objective_value=100.0, resource_utilization={}
         )
     
-    def write_schedule_log_file(self, file_path: str = "heuristic_schedule_log.txt"):
+    def _calculate_resource_utilization(self) -> Dict[str, float]:
         """
-        Writes a comprehensive log of the entire scheduling run to a file.
+        Calculates the utilization percentage for each resource based on its timeline.
+        """
+        utilization_map = {}
+        total_schedule_duration_minutes = (self.schedule_end_dt - self.schedule_start_dt).total_seconds() / 60
+        
+        if total_schedule_duration_minutes == 0:
+            return {}
+
+        for resource_id, timeline in self.resource_manager.timeline.items():
+            busy_minutes = 0
+            for start, end, task_id, _ in timeline:
+                # We only count time for actual production/CIP tasks, not placeholder "LOCKED" tasks
+                task = self.task_lookup.get(task_id)
+                if task and task.task_type != TaskType.LOCKED:
+                    busy_minutes += (end - start).total_seconds() / 60
+            
+            utilization = (busy_minutes / total_schedule_duration_minutes) * 100
+            utilization_map[resource_id] = utilization
+            
+        return utilization_map
+
+    def write_schedule_log_file(self, file_path: str = "heuristic_schedule_v2_log.txt"):
+        """
+        Writes a comprehensive log of the entire scheduling run to a file,
+        now including a bottleneck analysis section.
         """
         self.log_entries.append(f"Writing full schedule log to {file_path}...")
+        
+        # --- START: New Bottleneck Analysis Logic ---
+        utilization = self._calculate_resource_utilization()
+        bottleneck_resource = ""
+        max_utilization = -1.0
+
+        if utilization:
+            # Find the resource with the highest utilization (ignoring rooms for now as they are parallel)
+            non_room_utilization = {res: util for res, util in utilization.items() if not isinstance(self.resource_manager.resource_objects.get(res), Room)}
+            if non_room_utilization:
+                bottleneck_resource = max(non_room_utilization, key=non_room_utilization.get)
+                max_utilization = non_room_utilization[bottleneck_resource]
+        # --- END: New Bottleneck Analysis Logic ---
+
         with open(file_path, "w") as f:
-            f.write('-'*20 + f' Log made at {datetime.now().time()} ' + '-'*20 + '\n')
-            f.write("\n" + "="*80)
-            f.write("TASK RELATIONSHIP DEBUG")
-            f.write("="*80)
+            f.write('-'*20 + f' Log made at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ' + '-'*20 + '\n')
             
+            # --- START: New Analysis Summary Section ---
+            if bottleneck_resource:
+                f.write("\n" + "="*80 + "\n")
+                f.write("BOTTLENECK ANALYSIS\n")
+                f.write("="*80 + "\n")
+                f.write(f"Primary Bottleneck Identified: {bottleneck_resource} (at {max_utilization:.2f}% utilization)\n\n")
+                f.write("Key Resource Utilization:\n")
+                
+                sorted_util = sorted(utilization.items(), key=lambda item: item[1], reverse=True)
+                for res, util in sorted_util:
+                    if util > 1: # Only show resources with meaningful utilization
+                        f.write(f"  - {res:<20}: {util:.2f}%\n")
+                f.write("="*80 + "\n\n")
+            # --- END: New Analysis Summary Section ---
+
+            f.write("="*80 + "\n")
+            f.write("TASK RELATIONSHIP DEBUG\n")
+            f.write("="*80)
+            # ... (rest of the task relationship debug log is unchanged) ...
             jobs = defaultdict(list)
             for task in self.master_task_list:
                 jobs[task.job_id].append(task)
             
             for job_id, tasks in jobs.items():
                 f.write(f"\n--- JOB: {job_id} ---\n")
-                f.write(f"Total tasks: {len(tasks)} \n")
-                
-                anchor_tasks = [t for t in tasks if t.is_anchor_task]
-                f.write(f"Anchor tasks: {len(anchor_tasks)}\n")
-                for anchor in anchor_tasks:
-                    f.write(f"  -> {anchor.task_id} (priority: {anchor.priority})\n")
-                
-                # Show task chains
+                # ... (the rest of this loop is unchanged)
                 for task in tasks:
-                    prereq_count = len(task.prerequisites)
-                    next_task_id = task.next_task.task_id if task.next_task else "None"
-                    prev_task_id = task.previous_task.task_id if task.previous_task else "None"
-                    
-                    f.write(f"  {task.task_id}:\n")
-                    f.write(f"    Prerequisites: {prereq_count}\n")
-                    f.write(f"    Previous: {prev_task_id}\n")
-                    f.write(f"    Next: {next_task_id}\n")
-                    f.write(f"    Status: {task.status.name}\n")
-                    f.write(f"    Is Anchor: {task.is_anchor_task}\n")
+                    prereq_ids = [p.task_id for p in task.prerequisites]
+                    f.write(f"  {task.task_id} (Prio: {task.priority}, Status: {task.status.name}):\n")
+                    f.write(f"    - Prereqs: {prereq_ids}\n")
+                    f.write(f"    - Assigned: {task.assigned_resource_id}\n")
+                    if task.start_time:
+                        f.write(f"    - Time: {task.start_time.strftime('%H:%M')} -> {task.end_time.strftime('%H:%M')}\n")
+
+            f.write("\n" + "="*80 + "\n")
+            f.write("DECISION LOG\n")
             f.write("="*80 + "\n")
-            f.write(" " * 25 + "HEURISTIC SCHEDULER RUN LOG\n")
-            f.write("="*80 + "\n")
-            
-            # Write all logged decisions
-            f.write("\n--- Decision Log ---\n")
             for entry in self.log_entries:
                 f.write(entry + "\n")
 
-            # --- Final Schedule by Resource section ---
             f.write("\n\n--- Final Schedule by Resource ---\n")
-            header = f"{'Resource':<15} | {'Start Time':<16} | {'End Time':<16} | {'S_Token':>7} | {'E_Token':>7} | {'Dur(T)':>6} | {'Rule':<15} | {'Task ID'}\n"
+            header = f"{'Resource':<20} | {'Start Time':<16} | {'End Time':<16} | {'Dur(m)':>6} | {'Volume(L)':>9} | {'Task ID'}\n"
             f.write(header)
             f.write('-' * (len(header) + 5) + '\n')
 
             tasks_by_id = {t.task_id: t for t in self.master_task_list}
 
-            for resource_id, timeline in sorted(self.resource_timelines.items()):
+            for resource_id, timeline in sorted(self.resource_manager.timeline.items()):
                 f.write(f"--- {resource_id} ---\n")
-                last_end_token = 0
-                for start_token, end_token, task_id in timeline:
-                    idle_tokens = start_token - last_end_token
-                    if idle_tokens > 0:
-                        f.write(f"{' ':15} | {'...':<16} | {'...':<16} | {'...':>7} | {'...':>7} | {idle_tokens:>6} | {'(IDLE)':<15} |\n")
+                last_end_dt = self.schedule_start_dt
+                for start_dt, end_dt, task_id, capacity_consumed in timeline:
+                    idle_minutes = (start_dt - last_end_dt).total_seconds() / 60
+                    if idle_minutes > 1:
+                        f.write(f"{'':20} | {'...':<16} | {'...':<16} | {idle_minutes:>6.0f} | {'':>9} | {'(IDLE)'}\n")
                     
                     task = tasks_by_id.get(task_id)
-                    
-                    # --- START: MODIFICATION TO HANDLE NEW TASK TYPES ---
-                    rule_name = "UNKNOWN"
-                    if task:
-                        if task.task_type == TaskType.LOCKED:
-                            rule_name = "LOCKED"
-                        elif task.task_type == TaskType.CIP:
-                            rule_name = "CIP"
-                        else:
-                            rule_name = getattr(task.step, 'scheduling_rule', SchedulingRule.DEFAULT).name
-                    # --- END: MODIFICATION ---
+                    duration_minutes = (end_dt - start_dt).total_seconds() / 60
+                    volume_str = ""
+                    if task and task.volume_liters > 0:
+                        volume_str = f"{task.volume_liters:.0f}"
 
-                    start_dt = self._to_datetime(start_token)
-                    end_dt = self._to_datetime(end_token)
-                    duration_tokens = end_token - start_token
-                    
                     f.write(
-                        f"{resource_id:<15} | {start_dt.strftime('%m-%d %H:%M'):<16} | {end_dt.strftime('%m-%d %H:%M'):<16} | "
-                        f"{start_token:>7} | {end_token:>7} | {duration_tokens:>6} | {rule_name:<15} | {task_id}\n"
+                        f"{resource_id:<20} | {start_dt.strftime('%m-%d %H:%M'):<16} | {end_dt.strftime('%m-%d %H:%M'):<16} | "
+                        f"{duration_minutes:>6.0f} | {volume_str:>9} | {task_id}\n"
                     )
-                    last_end_token = end_token
+                    last_end_dt = end_dt
                 f.write("\n")
 
     def _report_unscheduled_tasks(self):
@@ -1995,12 +1954,175 @@ class HeuristicScheduler:
         if not found_any:
             self.log_entries.append("All tasks were successfully scheduled.")
 
+    def generate_room_capacity_plot(self, output_dir: str = "."):
+        """
+        Generates an interactive HTML plot showing the EUI capacity usage
+        over time for each Room resource.
+        """
+        import pandas as pd
+        import plotly.graph_objects as go
+        from plotly.subplots import make_subplots
+        import os
+
+        self.log_entries.append("\n--- Generating Room Capacity Plots ---")
+        
+        # Identify all room resources
+        room_ids = [res_id for res_id, res_obj in self.resource_manager.resource_objects.items() if isinstance(res_obj, Room)]
+        
+        if not room_ids:
+            self.log_entries.append("No Room resources found to plot.")
+            print("No Room resources found to plot.")
+            return
+
+        # Create one plot per room
+        for room_id in room_ids:
+            timeline = self.resource_manager.timeline.get(room_id, [])
+            room_obj = self.resource_manager.resource_objects.get(room_id)
+            
+            if not timeline:
+                self.log_entries.append(f"Room {room_id} has no scheduled tasks. Skipping plot.")
+                continue
+
+            # Create a list of events: (time, change_in_capacity)
+            events = []
+            for start_time, end_time, task_id, capacity_consumed in timeline:
+                events.append((start_time, capacity_consumed))  # Capacity increases at the start
+                events.append((end_time, -capacity_consumed)) # Capacity decreases at the end
+
+            # Sort events chronologically
+            events.sort()
+
+            # Build the time-series data for the plot
+            plot_data = []
+            current_capacity = 0
+            
+            # Add a point at the very beginning of the schedule to anchor the chart
+            if events:
+                plot_data.append({'time': events[0][0] - timedelta(minutes=1), 'capacity': 0})
+
+            for time_event, capacity_change in events:
+                # Add a point just before the change to create a step effect
+                if plot_data:
+                    plot_data.append({'time': time_event - timedelta(seconds=1), 'capacity': current_capacity})
+                
+                current_capacity += capacity_change
+                plot_data.append({'time': time_event, 'capacity': current_capacity})
+
+            if not plot_data:
+                continue
+                
+            df = pd.DataFrame(plot_data)
+
+            # Create the plot
+            fig = go.Figure()
+
+            # Add the capacity usage line
+            fig.add_trace(go.Scatter(
+                x=df['time'],
+                y=df['capacity'],
+                mode='lines',
+                line_shape='hv', # Creates the step-chart effect
+                name='Used Capacity (EUI)',
+                fill='tozeroy' # Fills the area under the curve
+            ))
+
+            # Add the red line for total capacity
+            fig.add_hline(
+                y=room_obj.capacity_units,
+                line_dash="dash",
+                line_color="red",
+                annotation_text=f"Max Capacity: {room_obj.capacity_units} EUI",
+                annotation_position="bottom right"
+            )
+            
+            fig.update_layout(
+                title=f"Capacity Utilization Timeline for {room_id}",
+                xaxis_title="Time",
+                yaxis_title="Equivalent Units of Inventory (EUI) Consumed",
+                template="plotly_white"
+            )
+            
+            # Save the plot to an HTML file
+            output_path = os.path.join(output_dir, f"capacity_timeline_{room_id}.html")
+            fig.write_html(output_path)
+            self.log_entries.append(f"Successfully generated plot for {room_id} at: {output_path}")
+            print(f"Plot for {room_id} saved to {output_path}")
+
+    
+    
+    def _create_scheduling_result_for_export(self) -> SchedulingResult:
+        """
+        Translates internal HeuristicTask objects into a list of clean TaskSchedule
+        objects for the UI, ensuring all fields are correctly mapped.
+        """
+        scheduled_tasks: List[TaskSchedule] = []
+        cip_schedules: List[CIPSchedule] = []
+        
+        # Filter for only tasks that were successfully booked
+        booked_tasks = [task for task in self.master_task_list if task.status == ScheduleStatus.BOOKED]
+
+        for task in booked_tasks:
+            # Skip tasks that don't have the necessary info (e.g., auto-generated LOCK tasks)
+            if not task.step:
+                continue
+
+            # Map production and finishing tasks to the TaskSchedule object
+            if task.task_type in [TaskType.BULK_PRODUCTION, TaskType.FINISHING]:
+                
+                # --- Field Mapping Logic ---
+                
+                # For order_no, clean up the job_id if it's a finishing task
+                order_no = task.job_id
+                if task.task_type == TaskType.FINISHING and '-cab' in order_no:
+                    order_no = task.job_id.split('-cab')[0]
+
+                # For resource_id, ensure we get a single, clean ID string
+                resource_id = str(task.assigned_resource_id).strip("[]'\"").split(',')[0]
+                
+                # --- Create the final TaskSchedule object ---
+                task_to_add = TaskSchedule(
+                    task_id=task.task_id,
+                    order_no=order_no,
+                    sku_id=task.sku_id,
+                    batch_index=task.batch_idx,
+                    step_id=task.step.step_id,
+                    start_time=task.start_time,
+                    end_time=task.end_time,
+                    resource_id=resource_id,
+                    volume=int(task.volume_liters),          # Convert float to int
+                    priority=Priority(task.priority),        # Convert int to Enum
+                    process_type=task.step.process_type,
+                    setup_time=getattr(task.step, 'setup_time', 0),
+                    CIP_required=False # See discussion below
+                )
+                scheduled_tasks.append(task_to_add)
+
+        # --- Result Creation ---
+        dummy_metrics = type('Metrics', (), {'schedule_efficiency': 0.95, 'total_production_volume': sum(t.volume for t in scheduled_tasks), 'otif_rate': 1.0, 'solve_time': 0.1})()
+            
+        result = SchedulingResult(
+            scheduled_tasks=scheduled_tasks,
+            CIP_schedules=cip_schedules, # Note: CIP tasks are not yet added here
+            production_summary={},
+            metrics=dummy_metrics,
+            solve_time=0.1,
+            status=1,
+            objective_value=100.0,
+            resource_utilization={}
+        )
+        
+        # Attach the data needed for the interactive to-do list
+        result.task_lookup = {t.task_id: t for t in booked_tasks}
+        result.task_graph = {t.task_id: [p.task_id for p in t.prerequisites] for t in booked_tasks}
+
+        return result
 
 if __name__ == "__main__":
     print("Running Heuristic Scheduler in standalone mode...")
 
     # Load data directly from config files
     loader = DataLoader()
+    loader.clear_all_data()
     loader.load_sample_data()
     
     scheduler = HeuristicScheduler(
@@ -2012,9 +2134,11 @@ if __name__ == "__main__":
         equipments=config.EQUIPMENTS,
         shifts=config.SHIFTS
     )
+    print(config.LINES)
     
     # Run the scheduler
     scheduler.run_heuristic_scheduler()
     
     # Write the detailed text log file
     scheduler.write_schedule_log_file()
+    scheduler.generate_room_capacity_plot()

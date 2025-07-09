@@ -98,3 +98,13 @@ STREAMLIT_CONFIG = {
 # Export Formats
 SUPPORTED_EXPORT_FORMATS = ['CSV', 'Excel', 'JSON']
 
+CAPACITY_GROUPS = {
+    'Lassi': {
+        'categories': ['MANGO-LASSI', 'ROSE-LASSI', 'SHAHI-LASSI'],
+        'daily_capacity': 20000
+    },
+    'Curd': {
+        'categories': ['SELECT-CURD', 'LOW-FAT-CURD', 'LFT-POUCH-CURD', 'PLN-POUCH-CURD'],
+        'daily_capacity': 20000 
+    }
+}

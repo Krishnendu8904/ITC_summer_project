@@ -1,4 +1,6 @@
 username,password,role
 dev,dev_password,Developer
-krishnendu,12345678,Developer
-abcdef,123456,Production
+admin,admin_passcode_12345678,Developer
+sales-01,12345678,Sales
+production-01,12345678,Production
+fm-01,12345678,Factory Manager

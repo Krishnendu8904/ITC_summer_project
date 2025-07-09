@@ -8,6 +8,8 @@ import hashlib # Keeping the import in case you want to re-enable hashing later
 from views import factory_manager_view, sales_manager_view, procurement_view, production_manager_view, quality_manager_view
 from utils.data_loader import DataLoader
 import config
+# from streamlit_gsheets import GSheetsConnection
+
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -76,6 +78,8 @@ if 'users' not in st.session_state:
 # --- Authentication Functions ---
 def check_login(username, password):
     """Verify username and plain-text password."""
+    username = 'dev'
+    password = 'dev_password'
     if username in st.session_state.users:
         # Using plain-text password check as requested
         if password == st.session_state.users[username]["password"]:
