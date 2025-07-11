@@ -65,8 +65,9 @@ class CapacityAnalyzer:
             """
             logging.info(f"--- Starting `map_maximum_capacity` for SKU ratio: {sku_ratio} ---")
             if not math.isclose(sum(sku_ratio.values()), 1.0):
+                ttl = sum(sku_ratio.values())
                 logging.error("SKU ratios do not sum to 1.0.")
-                return {"error": "SKU ratios must sum to 1.0"}
+                return {"error": f"SKU ratios must sum to 1.0 it is {ttl}"}
 
             categorized_skus = self._group_skus_by_category(sku_ratio)
             
@@ -236,7 +237,7 @@ class CapacityAnalyzer:
         logging.info("--- Entering Hard Constraint Optimization Loop ---")
         MAX_ATTEMPTS = 3
         
-        current_plan_ratio = {item['sku_id']: item['quantity_kg'] for item in production_plan}
+        current_plan_ratio = {item['sku_id']: item['requested_kg'] for item in production_plan}
         
         for attempt in range(MAX_ATTEMPTS):
             logging.info(f"Optimization Attempt {attempt + 1}/{MAX_ATTEMPTS}")
@@ -282,7 +283,7 @@ class CapacityAnalyzer:
             hard_req_failure = False
             for item in production_plan:
                 if item['type'] == 'hard':
-                    if new_achieved_production.get(item['sku_id'], 0) < item['quantity_kg']:
+                    if new_achieved_production.get(item['sku_id'], 0) < item['requested_kg']:
                         hard_req_failure = True
                         break # A hard req still failed, continue the loop
             
@@ -295,7 +296,7 @@ class CapacityAnalyzer:
                     final_analysis.append({
                         "sku_id": item['sku_id'],
                         "type": item['type'],
-                        "requested_kg": item['quantity_kg'],
+                        "requested_kg": item['requested_kg'],
                         "achievable_kg": new_achieved_production.get(item['sku_id'], 0)
                     })
                 return {
@@ -585,15 +586,15 @@ if __name__ == "__main__":
     sku_production_ratio = {
     "ROS-LAS-170G": 0.25,
     "MNG-LAS-170G": 0.25,
-    "PLN-PCH-CRD-1KG": 0.115,
-    "PLN-PCH-CRD-400G": 0,
-    "PLN-PCH-CRD-200G": 0.115,
-    "SEL-BKT-15KG": 0.09,
-    "SEL-BKT-5KG": 0.18,
-    "SEL-BKT-2KG": 0,
-    "SEL-BKT-1KG": 0,
-    "SEL-CUP-200G": 0,
-    "SEL-CUP-400G": 0
+    "PLN-PCH-CRD-1KG": 0.0842,
+    "PLN-PCH-CRD-400G": 0.0833,
+    "PLN-PCH-CRD-200G": 0.0823,
+    "SEL-BKT-15KG": 0.0625,
+    "SEL-BKT-5KG": 0.0469,
+    "SEL-BKT-2KG": 0.0469,
+    "SEL-BKT-1KG": 0.0313,
+    "SEL-CUP-200G": 0.0313,
+    "SEL-CUP-400G": 0.0313
 }
     logging.info(f"\n--- 1. Mapping Maximum Capacity for Ratio: {sku_production_ratio} ---")
     capacity_report = analyzer.map_maximum_capacity(sku_production_ratio)

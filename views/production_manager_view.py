@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 from datetime import datetime
+import plotly.graph_objects as go
 
 # --- Local Imports ---
 from views.gantt_chart_view import create_enhanced_gantt_chart, create_order_gantt, create_room_capacity_charts
@@ -155,6 +156,7 @@ def display_analytics(schedule_result):
             st.info("No room utilization data to display.")
 
 # --- NEW: Capacity Sandbox View ---
+# --- FINAL v2: Capacity Sandbox View ---
 def render_capacity_sandbox(analyzer):
     st.markdown('<h2 class="section-header">🔬 Capacity Sandbox</h2>', unsafe_allow_html=True)
     st.info("Use this tool to test different production mixes and find the theoretical maximum capacity and system bottlenecks.", icon="🧪")
@@ -186,10 +188,70 @@ def render_capacity_sandbox(analyzer):
     
     if 'last_capacity_report' in st.session_state and st.session_state.last_capacity_report:
         st.markdown("---")
-        st.markdown("### Analysis Report")
+        st.markdown("### 📈 Analysis Report")
         report = st.session_state.last_capacity_report
-        st.json(report)
 
+        st.markdown("##### Key Metrics")
+        col1, col2 = st.columns(2)
+        max_kg = report.get("implied_max_total_capacity_kg", 0)
+        bottleneck = report.get("system_bottleneck_stage", "N/A")
+        
+        col1.metric("Max Daily Throughput (kg)", f"{max_kg:,.0f}")
+        # MODIFICATION 1: Clarified label to "Bottleneck Stage"
+        col2.metric("Bottleneck Stage", f"`{bottleneck}`")
+
+        st.markdown("##### Production Mix at Max Capacity (kg)")
+        production_mix = report.get("final_achievable_production_kg", {})
+        if production_mix:
+            sorted_mix = sorted(production_mix.items(), key=lambda item: item[1], reverse=True)
+            mix_df = pd.DataFrame(sorted_mix, columns=["SKU", "Achievable Production (kg)"])
+            st.dataframe(mix_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("Production mix breakdown is not available.")
+
+        # MODIFICATION 2: Replaced dataframe with a better Plotly chart
+        st.markdown("##### Stage Capacity Analysis")
+        stage_capacities = report.get("details_stage_capacities_kg_per_day", {})
+        if stage_capacities:
+            stage_data = [{
+                "Stage": stage,
+                "Capacity (kg/day)": int(capacity)
+            } for stage, capacity in stage_capacities.items()]
+            
+            stage_df = pd.DataFrame(stage_data)
+            
+            # Highlight the bottleneck stage
+            stage_df['Color'] = stage_df['Stage'].apply(lambda s: 'tomato' if s == bottleneck else 'dodgerblue')
+
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                y=stage_df['Stage'],
+                x=stage_df['Capacity (kg/day)'],
+                text=stage_df['Capacity (kg/day)'].apply(lambda x: f'{x:,.0f}'),
+                textposition='inside',
+                insidetextanchor='middle',
+                marker_color=stage_df['Color'],
+                orientation='h'
+            ))
+
+            fig.update_layout(
+                title_text='Stage Capacity Analysis (kg/day)',
+                xaxis_title='Maximum Capacity (kg/day)',
+                yaxis_title=None,
+                yaxis={'categoryorder':'total ascending'},
+                height=max(400, len(stage_df) * 30), # Dynamic height
+                template='streamlit',
+                margin=dict(l=10, r=10, t=50, b=20),
+                font=dict(color="white"),
+                uniformtext_minsize=8, 
+                uniformtext_mode='hide'
+            )
+            fig.update_traces(textfont_color='white')
+
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Stage capacity details are not available.")
+            
 # --- MODIFIED: Feasibility Checker View ---
 def render_feasibility_checker(analyzer):
     st.markdown('<h2 class="section-header">📋 Feasibility Checker</h2>', unsafe_allow_html=True)
