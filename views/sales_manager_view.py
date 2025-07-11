@@ -23,7 +23,7 @@ def log_manual_override(user, indent_data, report):
         f"Timestamp: {timestamp}\n"
         f"User: {user}\n"
         f"Reason: Infeasible plan was manually overridden.\n"
-        f"Submitted Indent: {indent_data}\n"
+        f"Submitted Indents: {json.dumps(indent_data, indent=2, default=str)}\n"
         f"Feasibility Report: {json.dumps(report, indent=2)}\n"
         f"---------------------------\n\n"
     )
@@ -35,7 +35,6 @@ def initialize_state():
     """Initializes all required session state variables."""
     if 'data_loader' not in st.session_state:
         st.session_state.data_loader = DataLoader()
-        # --- INTEGRATION: Load all data needed for analyzer ---
         st.session_state.data_loader.load_sample_data()
 
     if 'capacity_analyzer' not in st.session_state:
@@ -51,11 +50,8 @@ def initialize_state():
         config.USER_INDENTS = st.session_state.data_loader.load_user_indents_with_fallback()
         st.session_state.user_indents_loaded = True
     
-    # State for feasibility check results
-    if 'feasibility_result' not in st.session_state:
-        st.session_state.feasibility_result = None
-    if 'new_indent_data' not in st.session_state:
-        st.session_state.new_indent_data = None
+    if 'feasibility_report_for_plan' not in st.session_state:
+        st.session_state.feasibility_report_for_plan = None
 
 
 # --- Indent Management Functions ---
@@ -74,112 +70,86 @@ def save_indents_to_csv(data_loader, indents_to_save: dict):
         st.error(f"❌ Error saving indents to CSV: {e}")
         return False
 
-# --- INTEGRATION: Refactored Indent Manager with Feasibility Check ---
+# --- REWRITTEN: Indent Manager with new workflow ---
 def render_indent_manager():
-    """Renders the UI for creating and deleting indents, with a new feasibility check workflow."""
+    """Renders the UI for managing a list of indents and checking feasibility of the entire plan."""
     analyzer = st.session_state.capacity_analyzer
 
-    col1, col2 = st.columns([1, 1.5], gap="large")
+    col1, col2 = st.columns([1.2, 1.5], gap="large")
     with col1:
-        st.markdown('<h3 class="section-header" style="font-size:1.4rem; margin-top:0;">📝 Create New Indent</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="section-header" style="font-size:1.4rem; margin-top:0;">➕ Add New Indent</h3>', unsafe_allow_html=True)
         
-        # --- Step 1: Input Form ---
-        with st.form("new_indent_form"):
+        with st.form("add_indent_form", clear_on_submit=True):
             available_skus = list(config.SKUS.keys())
             sku_id = st.selectbox("Select SKU", options=available_skus)
             qty = st.number_input("Quantity (kg)", min_value=100, value=1000, step=100)
             due_date = st.date_input("Due Date", value=datetime.datetime.now().date() + datetime.timedelta(days=3))
-            due_time = st.time_input("Due Time", value=datetime.time(17, 0))
             priority = st.selectbox("Priority", options=[p.name for p in Priority], index=1)
             
-            submitted = st.form_submit_button("Check Feasibility & Submit", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("Add to Plan", use_container_width=True)
             if submitted:
-                st.session_state.feasibility_result = None # Clear old results
-                full_due_date = datetime.datetime.combine(due_date, due_time)
-                # Store new indent data temporarily
-                st.session_state.new_indent_data = {
-                    "sku_id": sku_id, "quantity_kg": float(qty), "due_date": full_due_date, "priority": priority
-                }
-                
-                # Construct the full plan to check
-                production_plan = []
-                # Add existing indents as "hard" constraints
-                for indent in config.USER_INDENTS.values():
-                    production_plan.append({"sku_id": indent.sku_id, "quantity_kg": indent.qty_required_liters, "type": "hard"})
-                # Add the new indent as a "soft" constraint for the check
-                production_plan.append({"sku_id": sku_id, "quantity_kg": float(qty), "type": "soft"})
-
-                with st.spinner("Checking plan feasibility..."):
-                    # Always try to optimize hard constraints for sales view
-                    report = analyzer.check_feasibility(production_plan, optimize_hard_constraints=True)
-                    st.session_state.feasibility_result = report
-                st.rerun()
-
-        # --- Step 2: Display Results and Handle Actions ---
-        if st.session_state.feasibility_result:
-            report = st.session_state.feasibility_result
-            status = report.get("overall_status")
-            new_indent_info = st.session_state.new_indent_data
-
-            if status == "FEASIBLE":
-                st.success("✅ Plan is Feasible! Submitting indent.")
-                # Add to main indent list and save
-                order_no = f"{new_indent_info['sku_id']}-{new_indent_info['due_date'].strftime('%d%m%y')}"
-                new_indent = UserIndent(order_no=order_no, sku_id=new_indent_info['sku_id'], qty_required_liters=new_indent_info['quantity_kg'], due_date=new_indent_info['due_date'], priority=Priority[new_indent_info['priority']])
+                full_due_date = datetime.datetime.combine(due_date, datetime.time(17, 0))
+                order_no = f"{sku_id}-{full_due_date.strftime('%d%m%y%H%M%S')}"
+                new_indent = UserIndent(order_no=order_no, sku_id=sku_id, qty_required_liters=float(qty), due_date=full_due_date, priority=Priority[priority])
                 config.USER_INDENTS[order_no] = new_indent
-                save_indents_to_csv(st.session_state.data_loader, config.USER_INDENTS)
-                # Clean up state
-                st.session_state.feasibility_result = None
-                st.session_state.new_indent_data = None
-                time.sleep(1) # Give user time to read message
+                # Clear feasibility results as the plan has changed
+                st.session_state.feasibility_report_for_plan = None
                 st.rerun()
-
-            elif status in ["FEASIBLE_WITH_ADJUSTMENTS", "INFEASIBLE"]:
-                st.error("⚠️ Plan Not Fully Feasible")
-                st.markdown("The current production plan cannot accommodate the full request.")
-                
-                # Find the analysis for the new indent (it was the last 'soft' item)
-                new_indent_analysis = next((item for item in reversed(report.get("analysis", [])) if item['type'] == 'soft'), None)
-
-                if new_indent_analysis:
-                    requested = new_indent_analysis['requested_kg']
-                    achieved = new_indent_analysis['achievable_kg']
-                    shortfall = requested - achieved
-                    st.warning(f"Your request for **{requested} kg** of `{new_indent_analysis['sku_id']}` can only be fulfilled up to **{achieved} kg** (Shortfall: {shortfall} kg).")
-                    st.info(f"The limiting factor is the **{report.get('system_bottleneck_for_this_plan')}** stage.")
-
-                st.markdown("Please consider placing a smaller order or using Stock Transfer (STO).")
-
-                if st.button("Manual Override & Submit Anyway", use_container_width=True):
-                    log_manual_override("SalesManager", new_indent_info, report)
-                    # Add to main indent list and save
-                    order_no = f"{new_indent_info['sku_id']}-{new_indent_info['due_date'].strftime('%d%m%y')}"
-                    new_indent = UserIndent(order_no=order_no, sku_id=new_indent_info['sku_id'], qty_required_liters=new_indent_info['quantity_kg'], due_date=new_indent_info['due_date'], priority=Priority[new_indent_info['priority']])
-                    config.USER_INDENTS[order_no] = new_indent
-                    save_indents_to_csv(st.session_state.data_loader, config.USER_INDENTS)
-                    st.success("✅ Indent submitted with manual override.")
-                    # Clean up state
-                    st.session_state.feasibility_result = None
-                    st.session_state.new_indent_data = None
-                    time.sleep(2)
-                    st.rerun()
 
     with col2:
-        st.markdown('<h3 class="section-header" style="font-size:1.4rem; margin-top:0;">📋 Live Production Indents</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="section-header" style="font-size:1.4rem; margin-top:0;">📋 Current Production Plan</h3>', unsafe_allow_html=True)
         if config.USER_INDENTS:
             sorted_indents = sorted(config.USER_INDENTS.values(), key=lambda x: x.due_date)
-            indent_data = [{"Order Number": i.order_no, "SKU ID": i.sku_id, "Quantity (L)": i.qty_required_liters, "Due Date": i.due_date.strftime("%Y-%m-%d %H:%M"), "Priority": i.priority.name} for i in sorted_indents]
+            indent_data = [{"Order Number": i.order_no, "SKU ID": i.sku_id, "Quantity (kg)": i.qty_required_liters, "Due Date": i.due_date.strftime("%Y-%m-%d"), "Priority": i.priority.name} for i in sorted_indents]
             st.dataframe(pd.DataFrame(indent_data), use_container_width=True, hide_index=True)
-            st.markdown('<h3 class="section-header" style="font-size:1.4rem; margin-top:1.5rem;">🗑️ Delete an Indent</h3>', unsafe_allow_html=True)
-            order_to_delete = st.selectbox("Select an indent to delete", options=[""] + list(config.USER_INDENTS.keys()))
-            if st.button("❌ Delete Selected Indent", use_container_width=True, disabled=not order_to_delete):
-                if order_to_delete in config.USER_INDENTS:
-                    del config.USER_INDENTS[order_to_delete]
-                    if save_indents_to_csv(st.session_state.data_loader, config.USER_INDENTS):
-                        st.success(f"🗑️ Indent '{order_to_delete}' deleted successfully!")
-                    st.rerun()
+            
+            st.markdown("---")
+            # --- Feasibility Check for the entire plan ---
+            if st.button("Check Feasibility of Full Plan", use_container_width=True, type="primary"):
+                with st.spinner("Checking full plan feasibility..."):
+                    # Treat all current indents as hard requirements for the check
+                    production_plan = [{"sku_id": i.sku_id, "quantity_kg": i.qty_required_liters, "type": "hard"} for i in config.USER_INDENTS.values()]
+                    report = analyzer.check_feasibility(production_plan, optimize_hard_constraints=True)
+                    st.session_state.feasibility_report_for_plan = report
+                st.rerun()
         else:
-            st.info("No active indents. Create a new indent to get started.")
+            st.info("No active indents. Add an indent to get started.")
+
+    # --- Display Feasibility Results and Actions ---
+    if st.session_state.feasibility_report_for_plan:
+        report = st.session_state.feasibility_report_for_plan
+        status = report.get("overall_status")
+        
+        st.markdown("---")
+        st.markdown("#### Full Plan Feasibility Report")
+
+        if status == "FEASIBLE":
+            st.success("✅ The entire production plan is feasible!")
+            if st.button("Confirm and Save All Indents to CSV", use_container_width=True):
+                save_indents_to_csv(st.session_state.data_loader, config.USER_INDENTS)
+                st.toast("Plan saved successfully!", icon="🎉")
+                st.session_state.feasibility_report_for_plan = None
+                time.sleep(1)
+                st.rerun()
+        else:
+            if status == "INFEASIBLE":
+                st.error("❌ This plan is not feasible as requested.")
+            else: # FEASIBLE_WITH_ADJUSTMENTS
+                st.warning("⚠️ This plan is feasible, but with adjustments.")
+            
+            st.dataframe(pd.DataFrame(report.get("analysis", [])), use_container_width=True, hide_index=True)
+            st.info(f"The limiting factor is the **{report.get('system_bottleneck_for_this_plan')}** stage.")
+            st.markdown("Please consider adjusting the plan or using Stock Transfer (STO).")
+
+            if st.button("Manual Override & Save Plan Anyway", use_container_width=True):
+                # Log the entire set of indents that were overridden
+                indents_for_log = [i._to_dict() for i in config.USER_INDENTS.values()]
+                log_manual_override("SalesManager", indents_for_log, report)
+                save_indents_to_csv(st.session_state.data_loader, config.USER_INDENTS)
+                st.success("✅ Plan saved with manual override.")
+                st.session_state.feasibility_report_for_plan = None
+                time.sleep(2)
+                st.rerun()
 
 # --- Forecasting and Plan Views (No changes) ---
 def render_forecasting_view():
