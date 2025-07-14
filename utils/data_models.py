@@ -63,6 +63,7 @@ class ProcessType(StrEnum):
     PROCESSING = "Processing"
     PACKAGING = "Packaging"
     POST_PACKAGING = "Post_Packaging"
+    TRANSFER = "Transfer"
 
 class SchedulingRule(StrEnum):
     DEFAULT = 'Default'
@@ -231,6 +232,7 @@ class Equipment: # General purpose equipment like mixers, pasteurizers, incubato
     current_product_category: Optional[str] = None  # current product category running on equipment
     resource_type = ResourceType.EQUIPMENT
     capacity_type: CapacityType = CapacityType.BATCH
+    is_one_to_many: bool = False
 
     def __post_init__(self):
         if isinstance(self.status, str):

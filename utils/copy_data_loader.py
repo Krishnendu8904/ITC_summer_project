@@ -507,6 +507,7 @@ class DataLoader:
         except ValueError:
             return pd.to_datetime(time_str)
 
+    # Sample data creation methods
     def _create_sample_skus(self) -> Dict[str, SKU]:
         return {
         "SEL-BKT-1KG": SKU(sku_id="SEL-BKT-1KG", product_category="SELECT-CURD", inventory_size=0.521),
@@ -531,6 +532,7 @@ class DataLoader:
         "MNG-LSI-170G": SKU(sku_id="MNG-LSI-170G", product_category="MANGO-LASSI", inventory_size=1.0),
         "SHI-LSI-170G": SKU(sku_id="SHI-LSI-170G", product_category="SHAHI-LASSI", inventory_size=1.0)
     }
+
     
     def _create_sample_lines(self) -> Dict[str, Line]:
         config.LINES.clear()
@@ -610,6 +612,7 @@ class DataLoader:
                 )
             }
 
+
     def _create_sample_tanks(self) -> Dict[str, Tank]:
         return {
             "LT-1": Tank(tank_id= "LT-1",capacity_liters= 5000,CIP_duration_minutes= 90),
@@ -665,9 +668,9 @@ class DataLoader:
 
     def _create_sample_equipment(self) -> Dict[str, Equipment]:
         return {
-            "PST-1": Equipment(equipment_id= "PST-1",processing_speed= 120.0, setup_time_minutes= 15, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH),
-            "PST-2": Equipment(equipment_id= "PST-2",processing_speed= 100.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH),
-            "CRD-HTR-1": Equipment(equipment_id= "CRD-HTR-1",processing_speed= 25.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.SHARED_BY_CATEGORY),
+            "PST-1": Equipment(equipment_id= "PST-1",processing_speed= 85.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH),
+            "PST-2": Equipment(equipment_id= "PST-2",processing_speed= 85.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH),
+            "CRD-HTR-1": Equipment(equipment_id= "CRD-HTR-1",processing_speed= 83.330, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.SHARED_BY_CATEGORY),
             "THERMISER": Equipment(equipment_id= "THERMISER",processing_speed= 35.0, setup_time_minutes= 30, CIP_duration_minutes= 60, capacity_type=CapacityType.BATCH)
         }
 
@@ -692,23 +695,25 @@ class DataLoader:
         ProcessingStep(
             step_id="SEL-CRD-PAST",
             name="Pasteurisation",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3" ])],
             duration_minutes=60,
             scheduling_rule=SchedulingRule.ZERO_STAGNATION
         ),
         ProcessingStep(
             step_id="SEL-CRD-LT-STANDARDISATION-INNOCULATION",
             name="LT Standardisation",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
+            process_type=ProcessType.PROCESSING,
+            requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3" ])],
             duration_minutes=180
         ),
         ProcessingStep(
             step_id="SEL-CRD-PACKING",
             name="Packing",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["BUCKET-LINE-1","BUCKET-LINE-2","CUP-LINE-1","CUP-LINE-2"])],
+            requirements=[ResourceRequirement(ResourceType.LINE, ["BUCKET-LINE-1","BUCKET-LINE-2","CUP-LINE-1","CUP-LINE-2"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
             duration_minutes=60,
             scheduling_rule=SchedulingRule.ZERO_STAGNATION
         ),
@@ -741,23 +746,24 @@ class DataLoader:
         ProcessingStep(
             step_id="LF-CRD-PAST",
             name="Pasteurisation",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
-            duration_minutes=60,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
+            duration_minutes=60
         ),
         ProcessingStep(
             step_id="LF-CRD-LT-STANDARDISATION-INNOCULATION",
             name="LT Standardisation",
             process_type=ProcessType.PROCESSING,
-            requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
+            requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
             duration_minutes=120
         ),
         ProcessingStep(
             step_id="LF-CRD-PACKING",
             name="Packing",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["BUCKET-LINE-1","BUCKET-LINE-2","CUP-LINE-1","CUP-LINE-2"])],
+            requirements=[ResourceRequirement(ResourceType.LINE, ["BUCKET-LINE-1","BUCKET-LINE-2","CUP-LINE-1","CUP-LINE-2"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
             duration_minutes=60
         ),
         ProcessingStep(
@@ -789,23 +795,25 @@ class DataLoader:
         ProcessingStep(
             step_id="PLN-CRD-PAST",
             name="Pasteurisation",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
             duration_minutes=60,
             scheduling_rule=SchedulingRule.ZERO_STAGNATION
         ),
         ProcessingStep(
             step_id="PLN-CRD-LT-STANDARDISATION-INNOCULATION",
             name="LT Standardisation",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
+            process_type=ProcessType.PROCESSING,
+            requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2", "LT-3"])],
             duration_minutes=120
         ),
         ProcessingStep(
             step_id="PLN-CRD-POUCH-PACKING",
             name="Packing",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["POUCH-LINE-1", "POUCH-LINE-2"])],
+            requirements=[ResourceRequirement(ResourceType.LINE, ["POUCH-LINE-1", "POUCH-LINE-2"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
             duration_minutes=60,
             scheduling_rule=SchedulingRule.ZERO_STAGNATION
         ),
@@ -838,8 +846,9 @@ class DataLoader:
         ProcessingStep(
             step_id="LFT-CRD-PAST",
             name="Pasteurisation",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
             duration_minutes=60
         ),
         ProcessingStep(
@@ -853,7 +862,8 @@ class DataLoader:
             step_id="LFT-CRD-POUCH-PACKING",
             name="Packing",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["POUCH-LINE-1", "POUCH-LINE-2"])],
+            requirements=[ResourceRequirement(ResourceType.LINE, ["POUCH-LINE-1", "POUCH-LINE-2"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
             duration_minutes=60
         ),
         ProcessingStep(
@@ -885,10 +895,10 @@ class DataLoader:
         ProcessingStep(
             step_id="ROSE-LASSI-PST",
             name="ROSE-LASSI-PST",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
-            duration_minutes=60,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-4", "LT-5", "LT-6"])],
+            duration_minutes=60
         ),
         ProcessingStep(
             step_id="ROSE-LASSI-INNOC-INCUB",
@@ -901,9 +911,9 @@ class DataLoader:
             step_id="ROSE-LASSI-PACK",
             name="ROSE-LASSI-PACK",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["LASSI-LINE-1"])],
-            duration_minutes=300,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            requirements=[ResourceRequirement(ResourceType.LINE, ["LASSI-LINE-1"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
+            duration_minutes=300
         ),
         ProcessingStep(
             step_id="ROSE-LASSI-CHILLING",
@@ -925,10 +935,10 @@ class DataLoader:
         ProcessingStep(
             step_id="MANGO-LASSI-PST",
             name="MANGO-LASSI-PST",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
-            duration_minutes=60,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-4", "LT-5", "LT-6"])],
+            duration_minutes=60
         ),
         ProcessingStep(
             step_id="MANGO-LASSI-INNOC-INCUB",
@@ -941,9 +951,9 @@ class DataLoader:
             step_id="MANGO-LASSI-PACK",
             name="MANGO-LASSI-PACK",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["LASSI-LINE-1"])],
-            duration_minutes=300,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            requirements=[ResourceRequirement(ResourceType.LINE, ["LASSI-LINE-1"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
+            duration_minutes=300
         ),
         ProcessingStep(
             step_id="MANGO-LASSI-CHILLING",
@@ -965,10 +975,10 @@ class DataLoader:
         ProcessingStep(
             step_id="SHAHI-LASSI-PST",
             name="SHAHI-LASSI-PST",
-            process_type=ProcessType.PREPROCESSING,
-            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"])],
-            duration_minutes=60,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            process_type=ProcessType.TRANSFER,
+            requirements=[ResourceRequirement(ResourceType.EQUIPMENT, ["PST-1"]),
+                          ResourceRequirement(ResourceType.TANK, ["LT-4", "LT-5", "LT-6"])],
+            duration_minutes=60
         ),
         ProcessingStep(
             step_id="SHAHI-LASSI-INNOC-INCUB",
@@ -981,9 +991,9 @@ class DataLoader:
             step_id="SHAHI-LASSI-PACK",
             name="SHAHI-LASSI-PACK",
             process_type=ProcessType.PACKAGING,
-            requirements=[ResourceRequirement(ResourceType.LINE, ["LASSI-LINE-1"])],
-            duration_minutes=300,
-            scheduling_rule=SchedulingRule.ZERO_STAGNATION
+            requirements=[ResourceRequirement(ResourceType.LINE, ["LASSI-LINE-1"]),
+                          ResourceRequirement(ResourceType.EQUIPMENT, ["CRD-HTR-1"])],
+            duration_minutes=300
         ),
         ProcessingStep(
             step_id="SHAHI-LASSI-CHILLING",

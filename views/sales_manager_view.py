@@ -151,16 +151,27 @@ def render_indent_manager():
                 time.sleep(2)
                 st.rerun()
 
-# --- Forecasting and Plan Views (No changes) ---
+# --- MODIFIED: Forecasting View with Caching Control ---
 def render_forecasting_view():
-    st.markdown("""<div class="info-box" style="border-left-color: #007bff;">Run the complete simulation to generate demand forecasts.</div>""", unsafe_allow_html=True)
-    if st.button("📈 Generate Projections", type="primary", use_container_width=True):
-        with st.spinner("⏳ Running full simulation and generating plots..."):
-            st.session_state.projection_results = get_projections_and_plots(force_rerun=True)
+    st.markdown("""<div class="info-box" style="border-left-color: #007bff;">Run the simulation to generate demand forecasts. Use the checkbox to force a new calculation, ignoring any saved results.</div>""", unsafe_allow_html=True)
+    
+    # Use columns for a cleaner layout
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        run_button = st.button("📈 Generate / Refresh Projections", type="primary", use_container_width=True)
+    with col2:
+        force_rerun_check = st.checkbox("Force Re-run", value=False, help="If checked, the simulation will run from scratch, ignoring any cached data.")
+
+    if run_button:
+        with st.spinner("⏳ Running simulation and generating plots..."):
+            # The checkbox value now controls whether to force a re-run
+            st.session_state.projection_results = get_projections_and_plots(force_rerun=force_rerun_check)
         st.success("✅ Simulation complete! View results below.")
+
     if st.session_state.projection_results is None:
         st.info("Click the button above to generate projections.")
         return
+        
     st.markdown("---")
     sku_tab, category_tab = st.tabs(["**SKU Forecast**", "**Product Category Forecast**"])
     results = st.session_state.projection_results

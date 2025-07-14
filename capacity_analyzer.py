@@ -6,7 +6,7 @@ from utils.data_models import *
 from utils.data_loader import DataLoader
 import config
 
-OEE_FACTOR = 0.8
+OEE_FACTOR =0.8
 
 # --- 1. Logging Configuration ---
 # This sets up a logger to write detailed calculation steps to a file,
@@ -53,7 +53,7 @@ class CapacityAnalyzer:
         self.all_resources = {**self.time_based_resources, **rooms}
         
         self.DAILY_BUDGET_MINUTES = 1300
-        self.DEFAULT_BATCH_SIZE_LITERS = 8000
+        self.DEFAULT_BATCH_SIZE_LITERS = 10000
         logging.info("CapacityAnalyzer initialized with plant configuration.")
 
     # --- MAIN PUBLIC METHODS ---
@@ -143,7 +143,7 @@ class CapacityAnalyzer:
             max_total_kg, bottleneck_stage = self._solve_capacity_constraints(stage_capacities_kg, categorized_skus)
             logging.info(f"System Bottleneck identified: '{bottleneck_stage}' with an implied max total capacity of {max_total_kg:.2f} kg.")
 
-            final_sku_distribution = {sku_id: math.floor((max_total_kg * ratio) / 100) * 100 for sku_id, ratio in sku_ratio.items()}
+            final_sku_distribution = {sku_id: math.floor((max_total_kg * ratio) / 50) * 50 for sku_id, ratio in sku_ratio.items()}
             logging.info(f"Final achievable production (rounded): {final_sku_distribution}")
 
             return {
@@ -436,6 +436,8 @@ class CapacityAnalyzer:
             batch_size_liters = resource.capacity_liters * OEE_FACTOR
         elif hasattr(product_def, 'max_batch_size') and product_def.max_batch_size > 0:
             batch_size_liters = product_def.max_batch_size
+        
+        logging.info(f"DEBUG: For step {current_step.step_id}, final batch size is {batch_size_liters} L.")
 
         cip_time = getattr(resource, 'CIP_duration_minutes', 45)
         
@@ -584,11 +586,11 @@ if __name__ == "__main__":
 
     # --- Test 1: Capacity Mapping ---
     sku_production_ratio = {
-    "ROS-LAS-170G": 0.25,
-    "MNG-LAS-170G": 0.25,
-    "PLN-PCH-CRD-1KG": 0.0842,
-    "PLN-PCH-CRD-400G": 0.0833,
-    "PLN-PCH-CRD-200G": 0.0823,
+    "ROS-LSI-170G": 0.25,
+    "MNG-LSI-170G": 0.25,
+    "PLN-PCH-CRD-1KG": 0.0862,
+    "PLN-PCH-CRD-400G": 0.0823,
+    "PLN-PCH-CRD-200G": 0.0813,
     "SEL-BKT-15KG": 0.0625,
     "SEL-BKT-5KG": 0.0469,
     "SEL-BKT-2KG": 0.0469,
@@ -604,9 +606,9 @@ if __name__ == "__main__":
     # --- Test 2: Feasibility Check ---
     production_plan = [
         {"sku_id": "SEL-BKT-5KG", "quantity_kg": 5000, "type": "hard"},
-        #{"sku_id": "SEL-BKT-1KG", "quantity_kg": 1200, "type": "hard"},
-        #{"sku_id": "SEL-BKT-2KG", "quantity_kg": 1500, "type": "soft"},
-        {"sku_id": "SEL-BKT-15KG", "quantity_kg": 3000, "type": "soft"},
+        {"sku_id": "SEL-BKT-1KG", "quantity_kg": 1200, "type": "hard"},
+        # {"sku_id": "SEL-BKT-2KG", "quantity_kg": 1500, "type": "soft"},
+        # {"sku_id": "SEL-BKT-15KG", "quantity_kg": 3000, "type": "soft"},
         {"sku_id": "PLN-PCH-CRD-1KG", "quantity_kg": 4000, "type": "soft"},
         {"sku_id": "PLN-PCH-CRD-200G", "quantity_kg": 3600, "type": "soft"}
 

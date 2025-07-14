@@ -190,6 +190,7 @@ def render_capacity_sandbox(analyzer):
         st.markdown("---")
         st.markdown("### 📈 Analysis Report")
         report = st.session_state.last_capacity_report
+        print(report)
 
         st.markdown("##### Key Metrics")
         col1, col2 = st.columns(2)
@@ -197,7 +198,6 @@ def render_capacity_sandbox(analyzer):
         bottleneck = report.get("system_bottleneck_stage", "N/A")
         
         col1.metric("Max Daily Throughput (kg)", f"{max_kg:,.0f}")
-        # MODIFICATION 1: Clarified label to "Bottleneck Stage"
         col2.metric("Bottleneck Stage", f"`{bottleneck}`")
 
         st.markdown("##### Production Mix at Max Capacity (kg)")
@@ -209,7 +209,6 @@ def render_capacity_sandbox(analyzer):
         else:
             st.info("Production mix breakdown is not available.")
 
-        # MODIFICATION 2: Replaced dataframe with a better Plotly chart
         st.markdown("##### Stage Capacity Analysis")
         stage_capacities = report.get("details_stage_capacities_kg_per_day", {})
         if stage_capacities:
@@ -220,7 +219,6 @@ def render_capacity_sandbox(analyzer):
             
             stage_df = pd.DataFrame(stage_data)
             
-            # Highlight the bottleneck stage
             stage_df['Color'] = stage_df['Stage'].apply(lambda s: 'tomato' if s == bottleneck else 'dodgerblue')
 
             fig = go.Figure()
@@ -239,7 +237,7 @@ def render_capacity_sandbox(analyzer):
                 xaxis_title='Maximum Capacity (kg/day)',
                 yaxis_title=None,
                 yaxis={'categoryorder':'total ascending'},
-                height=max(400, len(stage_df) * 30), # Dynamic height
+                height=max(400, len(stage_df) * 30),
                 template='streamlit',
                 margin=dict(l=10, r=10, t=50, b=20),
                 font=dict(color="white"),
@@ -252,7 +250,7 @@ def render_capacity_sandbox(analyzer):
         else:
             st.info("Stage capacity details are not available.")
             
-# --- MODIFIED: Feasibility Checker View ---
+# --- MODIFIED: Feasibility Checker View (CORRECTED) ---
 def render_feasibility_checker(analyzer):
     st.markdown('<h2 class="section-header">📋 Feasibility Checker</h2>', unsafe_allow_html=True)
     st.info("Build a hypothetical production plan to check if it's feasible within a single day's capacity.", icon="🤔")
@@ -260,22 +258,19 @@ def render_feasibility_checker(analyzer):
     if 'plan_df' not in st.session_state:
         st.session_state.plan_df = pd.DataFrame(columns=["sku_id", "quantity_kg", "type"])
 
-    # --- MODIFICATION: Add title and button in columns ---
     col1, col2 = st.columns([2, 1.5])
     with col1:
         st.markdown("##### Build Production Plan")
     with col2:
         if st.button("📥 Load Current Indents", use_container_width=True, help="Loads all pending indents from the workbench into this table."):
-            # Check if indents have been loaded in the main workbench
             if config.USER_INDENTS:
-                # Convert indents to the DataFrame format
                 indent_list = [
                     {"sku_id": i.sku_id, "quantity_kg": i.qty_required_liters, "type": "hard"}
                     for i in config.USER_INDENTS.values()
                 ]
                 st.session_state.plan_df = pd.DataFrame(indent_list)
                 st.toast("Loaded current indents into the plan.", icon="✅")
-                st.rerun() # Rerun to show the updated table
+                st.rerun()
             else:
                 st.toast("No indents loaded. Please load them in the 'Scheduling Workbench' tab first.", icon="ℹ️")
 
@@ -301,7 +296,7 @@ def render_feasibility_checker(analyzer):
 
     if 'last_feasibility_report' in st.session_state and st.session_state.last_feasibility_report:
         st.markdown("---")
-        st.markdown("### Feasibility Report")
+        st.markdown("### 📊 Feasibility Report")
         report = st.session_state.last_feasibility_report
         
         status = report.get("overall_status")
@@ -314,14 +309,47 @@ def render_feasibility_checker(analyzer):
         
         st.markdown(f"**System Bottleneck for this Plan:** `{report.get('system_bottleneck_for_this_plan')}`")
         
-        st.dataframe(pd.DataFrame(report.get("analysis", [])), use_container_width=True, hide_index=True)
+        analysis_data = report.get("analysis", [])
+        if analysis_data:
+            analysis_df = pd.DataFrame(analysis_data)
+            analysis_df['shortfall_kg'] = analysis_df['requested_kg'] - analysis_df['achievable_kg']
+            
+            # Avoid division by zero
+            analysis_df['fulfillment_%'] = 0.0
+            mask = analysis_df['requested_kg'] > 0
+            analysis_df.loc[mask, 'fulfillment_%'] = (analysis_df.loc[mask, 'achievable_kg'] / analysis_df.loc[mask, 'requested_kg']) * 100
+
+            def style_rows(row):
+                style = [''] * len(row)
+                if row['achievable_kg'] < row['requested_kg']:
+                    if row['type'] == 'hard':
+                        style = ['background-color: #641e16; color: white'] * len(row) # Dark Red
+                    else:
+                        style = ['background-color: #783f04; color: white'] * len(row) # Dark Orange
+                return style
+
+            styled_df = analysis_df.style.apply(style_rows, axis=1).format({
+                'requested_kg': '{:,.0f}',
+                'achievable_kg': '{:,.0f}',
+                'shortfall_kg': '{:,.0f}',
+                'fulfillment_%': '{:.1f}%'
+            }).bar(
+                subset=['fulfillment_%'], 
+                align='left', 
+                vmin=0, 
+                vmax=100,
+                color=['#e74c3c', '#2ecc71'] # Red to Green
+            )
+            
+            st.dataframe(styled_df, use_container_width=True, hide_index=True)
+        else:
+             st.info("No analysis data to display.")
 
 
 # --- Main Render Function ---
 def render():
     st.markdown(" # Production Manager Dashboard")
 
-    # --- 1. Initialize Session State & Analyzer ---
     for key in ['factory_data_loaded', 'indents_loaded', 'last_schedule_result', 'task_statuses', 'last_schedule_id', 'capacity_analyzer']:
         if key not in st.session_state:
             st.session_state[key] = None
@@ -329,13 +357,12 @@ def render():
     if not st.session_state.factory_data_loaded:
         with st.spinner("Loading factory configuration..."):
             try:
-                # This assumes a DataLoader instance is created in the main app script
                 if 'data_loader' not in st.session_state:
+                    from utils.data_loader import DataLoader
                     st.session_state.data_loader = DataLoader()
                 data_loader = st.session_state.data_loader
                 data_loader.load_sample_data()
                 st.session_state.factory_data_loaded = True
-                # --- INTEGRATION: Initialize Analyzer once ---
                 st.session_state.capacity_analyzer = CapacityAnalyzer(
                     products=config.PRODUCTS, equipment=config.EQUIPMENTS, lines=config.LINES,
                     tanks=config.TANKS, skus=config.SKUS, rooms=config.ROOMS
@@ -351,7 +378,6 @@ def render():
         st.warning("Capacity Analyzer not loaded. Please refresh the page.")
         return
 
-    # --- 2. Main Tabbed Interface ---
     tab1, tab2, tab3 = st.tabs(["**Scheduling Workbench**", "**🔬 Capacity Sandbox**", "**📋 Feasibility Checker**"])
 
     with tab1:
