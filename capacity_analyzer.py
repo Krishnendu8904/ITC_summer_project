@@ -52,7 +52,7 @@ class CapacityAnalyzer:
         self.time_based_resources = {**equipment, **lines, **tanks}
         self.all_resources = {**self.time_based_resources, **rooms}
         
-        self.DAILY_BUDGET_MINUTES = 1440
+        self.DAILY_BUDGET_MINUTES = 1400
         self.DEFAULT_BATCH_SIZE_LITERS = 10000
         logging.info("CapacityAnalyzer initialized with plant configuration.")
 
