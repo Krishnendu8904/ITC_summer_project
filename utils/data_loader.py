@@ -736,7 +736,7 @@ class DataLoader:
             name="MST Standardisation",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
-            duration_minutes=240
+            duration_minutes=360
         ),
         ProcessingStep(
             step_id="LF-CRD-PAST",
@@ -751,7 +751,7 @@ class DataLoader:
             name="LT Standardisation",
             process_type=ProcessType.PROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
-            duration_minutes=120
+            duration_minutes=180
         ),
         ProcessingStep(
             step_id="LF-CRD-PACKING",
@@ -784,7 +784,7 @@ class DataLoader:
             name="MST Standardisation",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
-            duration_minutes=240
+            duration_minutes=360
         ),
         ProcessingStep(
             step_id="PLN-CRD-PAST",
@@ -799,7 +799,7 @@ class DataLoader:
             name="LT Standardisation",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
-            duration_minutes=120
+            duration_minutes=180
         ),
         ProcessingStep(
             step_id="PLN-CRD-POUCH-PACKING",
@@ -833,7 +833,7 @@ class DataLoader:
             name="MST Standardisation",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
-            duration_minutes=240
+            duration_minutes=360
         ),
         ProcessingStep(
             step_id="LFT-CRD-PAST",
@@ -847,7 +847,7 @@ class DataLoader:
             name="LT Standardisation",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["LT-1", "LT-2"])],
-            duration_minutes=120
+            duration_minutes=180
         ),
         ProcessingStep(
             step_id="LFT-CRD-POUCH-PACKING",
@@ -880,7 +880,7 @@ class DataLoader:
             name="ROSE-LASSI-STD",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
-            duration_minutes=240
+            duration_minutes=360
         ),
         ProcessingStep(
             step_id="ROSE-LASSI-PST",
@@ -920,7 +920,7 @@ class DataLoader:
             name="MANGO-LASSI-STD",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
-            duration_minutes=240
+            duration_minutes=360
         ),
         ProcessingStep(
             step_id="MANGO-LASSI-PST",
@@ -960,7 +960,7 @@ class DataLoader:
             name="SHAHI-LASSI-STD",
             process_type=ProcessType.PREPROCESSING,
             requirements=[ResourceRequirement(ResourceType.TANK, ["MST-1", "MST-2", "MST-3"])],
-            duration_minutes=240
+            duration_minutes=360
         ),
         ProcessingStep(
             step_id="SHAHI-LASSI-PST",

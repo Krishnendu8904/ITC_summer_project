@@ -52,7 +52,7 @@ class CapacityAnalyzer:
         self.time_based_resources = {**equipment, **lines, **tanks}
         self.all_resources = {**self.time_based_resources, **rooms}
         
-        self.DAILY_BUDGET_MINUTES = 1300
+        self.DAILY_BUDGET_MINUTES = 1440
         self.DEFAULT_BATCH_SIZE_LITERS = 10000
         logging.info("CapacityAnalyzer initialized with plant configuration.")
 
@@ -141,6 +141,7 @@ class CapacityAnalyzer:
 
             logging.info("--- Solving System Constraints ---")
             max_total_kg, bottleneck_stage = self._solve_capacity_constraints(stage_capacities_kg, categorized_skus)
+            max_total_kg = round(max_total_kg/50, 0)*50
             logging.info(f"System Bottleneck identified: '{bottleneck_stage}' with an implied max total capacity of {max_total_kg:.2f} kg.")
 
             final_sku_distribution = {sku_id: math.floor((max_total_kg * ratio) / 50) * 50 for sku_id, ratio in sku_ratio.items()}
